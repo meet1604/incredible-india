@@ -121,11 +121,13 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
       scale: s,
       x: tx,
       y: ty,
+      opacity: 0,
       duration: 1.3,
       ease: "power2.inOut",
-      onComplete: () => {
-        onKeralaClick?.();
-      },
+    });
+
+    gsap.delayedCall(0.7, () => {
+      onKeralaClick?.();
     });
   };
 
