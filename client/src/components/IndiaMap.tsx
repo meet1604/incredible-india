@@ -200,23 +200,13 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
                 <path
                   key={i}
                   d={d}
-                  fill={
-                    isHovered
-                      ? isKerala ? "#4ade80" : "#FACC15"
-                      : isKerala ? "#1a3a2a" : "#2a2a2a"
-                  }
-                  stroke={
-                    isHovered
-                      ? isKerala ? "#4ade80" : "#FDE047"
-                      : isKerala ? "#2d5a3d" : "#444444"
-                  }
-                  strokeWidth={isHovered ? 1.4 : isKerala ? 0.8 : 0.6}
+                  fill={isHovered ? "#FACC15" : "#2a2a2a"}
+                  stroke={isHovered ? "#FDE047" : "#444444"}
+                  strokeWidth={isHovered ? 1.4 : 0.6}
                   style={{
                     transition: "fill 0.2s ease, stroke 0.2s ease",
                     cursor: isKerala ? "pointer" : "default",
-                    filter: isHovered && isKerala
-                      ? "drop-shadow(0 0 12px rgba(74,222,128,0.6))"
-                      : isHovered
+                    filter: isHovered
                       ? "drop-shadow(0 0 10px rgba(250,204,21,0.5))"
                       : "none",
                   }}
@@ -279,7 +269,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
               style={{
                 background: "rgba(8,8,8,0.92)",
                 backdropFilter: "blur(14px)",
-                border: `1px solid ${tooltip.name === "Kerala" ? "rgba(74,222,128,0.5)" : "rgba(250,204,21,0.4)"}`,
+                border: "1px solid rgba(250,204,21,0.4)",
                 borderRadius: 6,
                 padding: "8px 14px",
                 minWidth: 130,
@@ -298,7 +288,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
                     fontSize: 8,
                     letterSpacing: "0.2em",
                     marginTop: 3,
-                    color: tooltip.name === "Kerala" ? "#4ade80" : "#FACC15",
+                    color: "#FACC15",
                   }}
                 >
                   {tooltip.label}
