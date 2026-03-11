@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronDown, MapPin, Play, ArrowRight, Globe, Camera, Mountain, Waves, Star, Menu, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -89,6 +90,43 @@ export default function Home() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState<Record<number, boolean>>({});
+  const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
+
+  const { data: heroVideos } = useQuery<Record<string, string | null>>({
+    queryKey: ["/api/hero-videos"],
+    staleTime: Infinity,
+  });
+
+  const getVideoUrl = useCallback((name: string): string | null => {
+    if (!heroVideos) return null;
+    return heroVideos[name] ?? null;
+  }, [heroVideos]);
+
+
+  useEffect(() => {
+    destinations.forEach((dest, i) => {
+      const vid = videoRefs.current[i];
+      if (!vid) return;
+      const url = heroVideos?.[dest.name];
+      if (url && !vid.src) {
+        vid.src = url;
+        vid.load();
+      }
+      if (i === currentSlide) {
+        vid.currentTime = 0;
+        vid.play().catch(() => {});
+      } else {
+        vid.pause();
+        const nextIndex = (currentSlide + 1) % destinations.length;
+        if (i === nextIndex && url && !vid.src) {
+          vid.preload = "auto";
+          vid.src = url;
+          vid.load();
+        }
+      }
+    });
+  }, [currentSlide, heroVideos]);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -262,25 +300,59 @@ export default function Home() {
       {/* ── Hero Section ── */}
       <section ref={heroRef} className="relative w-full h-screen overflow-hidden">
 
-        {/* Background images with Ken Burns + crossfade */}
+        {/* Background videos with crossfade — image fallback when video not ready */}
         <div className="absolute inset-0">
-          {destinations.map((dest, i) => (
-            <div
-              key={dest.id}
-              className="absolute inset-0 transition-opacity duration-[1800ms] ease-in-out"
-              style={{ opacity: i === currentSlide ? 1 : 0, zIndex: i === currentSlide ? 1 : 0 }}
-            >
+          {destinations.map((dest, i) => {
+            const videoUrl = getVideoUrl(dest.name);
+            const isActive = i === currentSlide;
+            const hasVideo = !!(videoUrl && videoLoaded[i]);
+            return (
               <div
-                className="absolute inset-0 will-change-transform"
+                key={dest.id}
+                className="absolute inset-0"
                 style={{
-                  animation: i === currentSlide ? "kenBurns 9s ease-out forwards" : "none",
-                  backgroundImage: `url(${dest.image})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
+                  opacity: isActive ? 1 : 0,
+                  zIndex: isActive ? 1 : 0,
+                  transition: "opacity 1500ms ease-in-out",
+                  willChange: "opacity",
                 }}
-              />
-            </div>
-          ))}
+              >
+                {/* Fallback image — always rendered, hidden once video ready */}
+                <div
+                  className="absolute inset-0 will-change-transform"
+                  style={{
+                    animation: isActive && !hasVideo ? "kenBurns 9s ease-out forwards" : "none",
+                    backgroundImage: `url(${dest.image})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    opacity: hasVideo ? 0 : 1,
+                    transition: "opacity 800ms ease-in-out",
+                  }}
+                />
+                {/* Video layer */}
+                <video
+                  ref={(el) => { videoRefs.current[i] = el; }}
+                  autoPlay={isActive}
+                  muted
+                  loop
+                  playsInline
+                  preload={i === 0 ? "auto" : "none"}
+                  onCanPlay={() => {
+                    setVideoLoaded((prev) => ({ ...prev, [i]: true }));
+                    if (isActive) videoRefs.current[i]?.play().catch(() => {});
+                  }}
+                  className="absolute inset-0 w-full h-full"
+                  style={{
+                    objectFit: "cover",
+                    opacity: hasVideo ? 1 : 0,
+                    transition: "opacity 800ms ease-in-out",
+                    willChange: "opacity",
+                    transform: "translateZ(0)",
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {/* Gradient overlays */}

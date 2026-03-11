@@ -2,15 +2,65 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY || "";
+
+const DESTINATION_QUERIES: Record<string, string> = {
+  "Taj Mahal":        "Taj Mahal aerial India",
+  "Udaipur":          "Udaipur lake palace India aerial",
+  "Statue of Unity":  "Narmada river India aerial nature",
+  "Kashmir":          "Kashmir valley India aerial",
+  "Ladakh":           "Ladakh mountains India landscape aerial",
+  "Lakshadweep":      "tropical island turquoise ocean aerial drone",
+};
+
+const videoCache: Record<string, string> = {};
+
+async function fetchPexelsVideo(query: string): Promise<string | null> {
+  if (!PEXELS_API_KEY) return null;
+  try {
+    const url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=5&orientation=landscape&size=large`;
+    const res = await fetch(url, { headers: { Authorization: PEXELS_API_KEY } });
+    if (!res.ok) return null;
+    const data: any = await res.json();
+    const videos: any[] = data.videos || [];
+    for (const video of videos) {
+      const files: any[] = video.video_files || [];
+      const hd = files.find((f: any) => f.quality === "hd" && f.file_type === "video/mp4")
+              || files.find((f: any) => f.file_type === "video/mp4");
+      if (hd?.link) return hd.link;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  app.get("/api/hero-videos", async (_req, res) => {
+    if (!PEXELS_API_KEY) {
+      return res.status(503).json({ error: "PEXELS_API_KEY not configured" });
+    }
+
+    const results: Record<string, string | null> = {};
+
+    await Promise.all(
+      Object.entries(DESTINATION_QUERIES).map(async ([dest, query]) => {
+        if (videoCache[dest]) {
+          results[dest] = videoCache[dest];
+          return;
+        }
+        const url = await fetchPexelsVideo(query);
+        if (url) videoCache[dest] = url;
+        results[dest] = url;
+      })
+    );
+
+    res.json(results);
+  });
 
   return httpServer;
 }

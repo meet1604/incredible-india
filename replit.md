@@ -19,7 +19,7 @@ A premium cinematic travel website hero banner inspired by myswitzerland.com, fo
 - `tailwind.config.ts` — Design tokens (includes Cinzel, Cormorant Garamond, Inter, Montserrat fonts)
 
 ## Features
-- **Cinematic Hero**: Full-screen slideshow with Ken Burns zoom effect and crossfade transitions between 6 Indian destinations
+- **Cinematic Hero with Live Videos**: Full-screen video slideshow fetched automatically from Pexels API. Each destination gets a live drone/aerial video that crossfades between slides. Falls back to Unsplash images while videos load or if API is unavailable.
 - **Smooth Animations**: GSAP-powered text reveal animations, scroll-triggered section reveals
 - **Parallax Effects**: Framer Motion scroll-based parallax for hero section
 - **Destinations Grid**: Editorial layout showcasing Taj Mahal, Udaipur, Kashmir, Ladakh, Lakshadweep, Statue of Unity
