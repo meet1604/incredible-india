@@ -130,7 +130,7 @@ export default function Home() {
       curY += (tgtY - curY) * factor;
       // Raw floats — no toFixed() rounding which causes micro-jitter
       videoBg.style.transform =
-        `translate3d(${curX}px, ${curY}px, 0) scale(1.35)`;
+        `translate3d(${curX}px, ${curY}px, 0) scale(1.45)`;
       rafId = requestAnimationFrame(tick);
     };
 
@@ -140,8 +140,8 @@ export default function Home() {
       // x/y in range -0.5 … +0.5 relative to screen centre
       const x = e.clientX / window.innerWidth  - 0.5;
       const y = e.clientY / window.innerHeight - 0.5;
-      tgtX = -x * 120;
-      tgtY = -y * 120;
+      tgtX = Math.max(-200, Math.min(200, -x * 200));
+      tgtY = Math.max(-200, Math.min(200, -y * 200));
     };
 
     const onMouseLeave = () => {
