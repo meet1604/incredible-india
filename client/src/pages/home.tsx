@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ChevronDown, MapPin, Play, ArrowRight, Globe, Camera, Mountain, Waves, Star, Menu, X } from "lucide-react";
+import { ChevronDown, MapPin, ArrowRight, Globe, Camera, Mountain, Waves, Star, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -30,16 +30,6 @@ const destinations = [
   },
   {
     id: 3,
-    name: "Kashmir",
-    location: "Jammu & Kashmir",
-    tagline: "Paradise on Earth",
-    description: "The Mughals called it paradise. Dal Lake at dawn, houseboats in mist, saffron fields in bloom — Kashmir transcends imagination.",
-    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1920&q=85&auto=format&fit=crop",
-    color: "#81b29a",
-    category: "Natural Wonder",
-  },
-  {
-    id: 4,
     name: "Ladakh",
     location: "Union Territory of Ladakh",
     tagline: "Land of High Passes",
@@ -47,26 +37,6 @@ const destinations = [
     image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1920&q=85&auto=format&fit=crop",
     color: "#9c6b3c",
     category: "Adventure",
-  },
-  {
-    id: 5,
-    name: "Lakshadweep",
-    location: "Union Territory",
-    tagline: "A Hundred Thousand Islands",
-    description: "Turquoise lagoons, white sand beaches and the most pristine coral reefs in the world — India's best kept secret.",
-    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&q=85&auto=format&fit=crop",
-    color: "#3a86ff",
-    category: "Island Paradise",
-  },
-  {
-    id: 6,
-    name: "Statue of Unity",
-    location: "Gujarat",
-    tagline: "The World's Tallest Statue",
-    description: "Standing 182 metres above the Narmada river, the colossal tribute to Sardar Patel watches over the valley of India's heartland.",
-    image: "https://images.unsplash.com/photo-1600184894648-0d1a434c4459?w=1920&q=85&auto=format&fit=crop",
-    color: "#c77dff",
-    category: "Modern Marvel",
   },
 ];
 
@@ -129,7 +99,6 @@ export default function Home() {
   }, [currentSlide, heroVideos]);
 
   const heroRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const destinationsRef = useRef<HTMLDivElement>(null);
   const experiencesRef = useRef<HTMLDivElement>(null);
@@ -137,13 +106,8 @@ export default function Home() {
   // ── Mouse parallax refs (wrapper divs — never touched by GSAP)
   const pxVideoBgRef  = useRef<HTMLDivElement>(null);
   const pxGradientRef = useRef<HTMLDivElement>(null);
-  const pxTitleRef    = useRef<HTMLDivElement>(null);
-  const pxSubtitleRef = useRef<HTMLDivElement>(null);
-  const pxCTARef      = useRef<HTMLDivElement>(null);
 
   const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 600], [1, 0]);
-  const heroY = useTransform(scrollY, [0, 600], [0, 120]);
   const parallaxY = useTransform(scrollY, [0, 800], [0, -160]);
 
   useEffect(() => {
@@ -163,9 +127,6 @@ export default function Home() {
     const layers: Array<[React.RefObject<HTMLDivElement>, number]> = [
       [pxVideoBgRef,  0.1],
       [pxGradientRef, 0.2],
-      [pxTitleRef,    0.3],
-      [pxSubtitleRef, 0.4],
-      [pxCTARef,      0.5],
     ];
 
     // Enable CSS transition on all layer elements for smooth motion
@@ -225,15 +186,7 @@ export default function Home() {
   }, [currentSlide, isTransitioning]);
 
   useEffect(() => {
-    if (!textRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.from(".hero-eyebrow", { opacity: 0, y: 30, duration: 1.2, delay: 0.3, ease: "power3.out" });
-      gsap.from(".hero-title-line", { opacity: 0, y: 60, duration: 1.4, delay: 0.6, stagger: 0.15, ease: "power3.out" });
-      gsap.from(".hero-subtitle", { opacity: 0, y: 30, duration: 1.2, delay: 1.1, ease: "power3.out" });
-      gsap.from(".hero-cta", { opacity: 0, y: 20, duration: 1, delay: 1.4, ease: "power3.out" });
-    }, textRef);
-    gsap.from(".scroll-indicator", { opacity: 0, y: -20, duration: 1, delay: 2.2, ease: "power3.out" });
-    return () => ctx.revert();
+    gsap.from(".scroll-indicator", { opacity: 0, y: -20, duration: 1, delay: 1, ease: "power3.out" });
   }, []);
 
   useEffect(() => {
@@ -434,58 +387,6 @@ export default function Home() {
           background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)"
         }} />
 
-        {/* Hero text */}
-        <motion.div
-          ref={textRef}
-          style={{ y: heroY, opacity: heroOpacity }}
-          className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-6"
-        >
-          <div className="hero-eyebrow flex items-center gap-3 mb-8">
-            <div className="w-8 h-px bg-white/50" />
-            <span className="font-montserrat text-white/70 text-xs tracking-[0.4em] uppercase font-medium">
-              {destinations[currentSlide]?.location}
-            </span>
-            <div className="w-8 h-px bg-white/50" />
-          </div>
-
-          <div ref={pxTitleRef} className="mb-4">
-            <h1 className="overflow-hidden">
-              <div className="hero-title-line font-cinzel text-[clamp(2.8rem,7vw,7rem)] font-bold text-white leading-[0.95] tracking-[0.02em]">
-                Experience
-              </div>
-              <div className="hero-title-line font-cinzel text-[clamp(2.8rem,7vw,7rem)] font-bold leading-[0.95] tracking-[0.02em]"
-                style={{ WebkitTextFillColor: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.85)" }}>
-                Incredible India
-              </div>
-            </h1>
-          </div>
-
-          <div ref={pxSubtitleRef} className="mt-6 mb-10">
-            <p className="hero-subtitle font-cormorant text-white/75 text-[clamp(1rem,2.2vw,1.5rem)] font-light italic tracking-wide max-w-xl">
-              "From royal palaces to Himalayan adventures"
-            </p>
-          </div>
-
-          <div ref={pxCTARef}>
-            <div className="hero-cta flex flex-col sm:flex-row items-center gap-4">
-            <button
-              data-testid="button-explore-hero"
-              className="group flex items-center gap-3 bg-white text-black font-montserrat text-xs font-bold tracking-[0.2em] uppercase px-8 py-4 hover:bg-amber-100 transition-all duration-400"
-              style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
-            >
-              <Play className="w-3 h-3 fill-current" />
-              Explore India
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
-            </button>
-            <button
-              data-testid="button-destinations-hero"
-              className="font-montserrat text-white text-xs font-medium tracking-[0.2em] uppercase px-6 py-4 border border-white/25 hover:border-white/60 backdrop-blur-sm transition-all duration-400"
-            >
-              View Destinations
-            </button>
-          </div>
-          </div>
-        </motion.div>
 
         {/* Slide dots */}
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
@@ -877,7 +778,7 @@ export default function Home() {
               </p>
             </div>
             {[
-              { title: "Destinations", links: ["Taj Mahal", "Kashmir", "Ladakh", "Lakshadweep", "Udaipur"] },
+              { title: "Destinations", links: ["Taj Mahal", "Udaipur", "Ladakh"] },
               { title: "Experiences", links: ["Adventure", "Heritage", "Beaches", "Spirituality", "Cuisine"] },
               { title: "Plan Your Trip", links: ["Best Time to Visit", "Visa & Entry", "Getting Around", "Where to Stay", "Safety"] },
             ].map((col) => (

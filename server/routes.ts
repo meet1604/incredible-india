@@ -4,17 +4,13 @@ import { storage } from "./storage";
 
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || "";
 
-const DESTINATION_QUERIES: Record<string, string> = {
-  "Statue of Unity":  "Narmada river India aerial nature",
-  "Kashmir":          "Kashmir valley India aerial",
-  "Ladakh":           "Ladakh mountains India landscape aerial",
-  "Lakshadweep":      "tropical island turquoise ocean aerial drone",
-};
+const DESTINATION_QUERIES: Record<string, string> = {};
 
 // Pinned Pexels video IDs — fetched directly, bypassing search
 const PINNED_VIDEO_IDS: Record<string, number> = {
   "Taj Mahal": 4763824,
   "Udaipur":   6981411,
+  "Ladakh":    5379990,
 };
 
 const videoCache: Record<string, string> = {};
