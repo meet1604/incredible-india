@@ -134,11 +134,11 @@ export default function Home() {
   const destinationsRef = useRef<HTMLDivElement>(null);
   const experiencesRef = useRef<HTMLDivElement>(null);
 
-  // ── Mouse parallax refs (one per depth layer)
+  // ── Mouse parallax refs (wrapper divs — never touched by GSAP)
   const pxVideoBgRef  = useRef<HTMLDivElement>(null);
   const pxGradientRef = useRef<HTMLDivElement>(null);
-  const pxTitleRef    = useRef<HTMLHeadingElement>(null);
-  const pxSubtitleRef = useRef<HTMLParagraphElement>(null);
+  const pxTitleRef    = useRef<HTMLDivElement>(null);
+  const pxSubtitleRef = useRef<HTMLDivElement>(null);
   const pxCTARef      = useRef<HTMLDivElement>(null);
 
   const { scrollY } = useScroll();
@@ -152,65 +152,60 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ── Mouse parallax ── RAF-driven, disabled on touch/mobile
+  // ── Mouse parallax ── direct event handler, CSS transition for smooth lerp
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
     if (!heroRef.current) return;
 
     const hero = heroRef.current;
 
-    // Layers: [ref, maxOffset px]
-    const layers: Array<[{ current: HTMLElement | null }, number]> = [
-      [pxVideoBgRef  as { current: HTMLElement | null }, 2 ],
-      [pxGradientRef as { current: HTMLElement | null }, 4 ],
-      [pxTitleRef    as { current: HTMLElement | null }, 8 ],
-      [pxSubtitleRef as { current: HTMLElement | null }, 10],
-      [pxCTARef      as { current: HTMLElement | null }, 12],
+    // [ref, depth multiplier (higher = more movement)]
+    const layers: Array<[React.RefObject<HTMLDivElement>, number]> = [
+      [pxVideoBgRef,  0.1],
+      [pxGradientRef, 0.2],
+      [pxTitleRef,    0.3],
+      [pxSubtitleRef, 0.4],
+      [pxCTARef,      0.5],
     ];
 
-    let targetX = 0, targetY = 0;
-    let currentX = 0, currentY = 0;
-    let rafId = 0;
-    const LERP = 0.07;
-
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    // Enable CSS transition on all layer elements for smooth motion
+    for (const [ref] of layers) {
+      if (ref.current) {
+        ref.current.style.transition = "transform 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+        ref.current.style.willChange = "transform";
+      }
+    }
 
     const onMouseMove = (e: MouseEvent) => {
-      const rect = hero.getBoundingClientRect();
-      targetX = ((e.clientX - rect.left) / rect.width  - 0.5) * 2;
-      targetY = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
-    };
+      // Normalize to -1..+1 relative to window center
+      const x = (e.clientX / window.innerWidth  - 0.5) * 20;
+      const y = (e.clientY / window.innerHeight - 0.5) * 20;
 
-    const onMouseLeave = () => { targetX = 0; targetY = 0; };
-
-    const tick = () => {
-      currentX = lerp(currentX, targetX, LERP);
-      currentY = lerp(currentY, targetY, LERP);
-      for (const [ref, max] of layers) {
+      for (const [ref, mult] of layers) {
         const el = ref.current;
         if (!el) continue;
-        const x = +(currentX * max).toFixed(3);
-        const y = +(currentY * max).toFixed(3);
-        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        el.style.transform = `translate3d(${(x * mult).toFixed(2)}px, ${(y * mult).toFixed(2)}px, 0)`;
       }
-      rafId = requestAnimationFrame(tick);
+    };
+
+    const onMouseLeave = () => {
+      for (const [ref] of layers) {
+        if (ref.current) ref.current.style.transform = "translate3d(0px, 0px, 0)";
+      }
     };
 
     hero.addEventListener("mousemove", onMouseMove);
     hero.addEventListener("mouseleave", onMouseLeave);
 
-    // Start after all GSAP entry animations finish (~2.4s) to avoid transform conflicts
-    const startTimer = setTimeout(() => {
-      rafId = requestAnimationFrame(tick);
-    }, 2700);
-
     return () => {
       hero.removeEventListener("mousemove", onMouseMove);
       hero.removeEventListener("mouseleave", onMouseLeave);
-      clearTimeout(startTimer);
-      cancelAnimationFrame(rafId);
       for (const [ref] of layers) {
-        if (ref.current) ref.current.style.transform = "";
+        if (ref.current) {
+          ref.current.style.transform = "";
+          ref.current.style.transition = "";
+          ref.current.style.willChange = "";
+        }
       }
     };
   }, []);
@@ -453,21 +448,26 @@ export default function Home() {
             <div className="w-8 h-px bg-white/50" />
           </div>
 
-          <h1 ref={pxTitleRef} className="overflow-hidden mb-4" style={{ willChange: "transform" }}>
-            <div className="hero-title-line font-cinzel text-[clamp(2.8rem,7vw,7rem)] font-bold text-white leading-[0.95] tracking-[0.02em]">
-              Experience
-            </div>
-            <div className="hero-title-line font-cinzel text-[clamp(2.8rem,7vw,7rem)] font-bold leading-[0.95] tracking-[0.02em]"
-              style={{ WebkitTextFillColor: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.85)" }}>
-              Incredible India
-            </div>
-          </h1>
+          <div ref={pxTitleRef} className="mb-4">
+            <h1 className="overflow-hidden">
+              <div className="hero-title-line font-cinzel text-[clamp(2.8rem,7vw,7rem)] font-bold text-white leading-[0.95] tracking-[0.02em]">
+                Experience
+              </div>
+              <div className="hero-title-line font-cinzel text-[clamp(2.8rem,7vw,7rem)] font-bold leading-[0.95] tracking-[0.02em]"
+                style={{ WebkitTextFillColor: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.85)" }}>
+                Incredible India
+              </div>
+            </h1>
+          </div>
 
-          <p ref={pxSubtitleRef} className="hero-subtitle font-cormorant text-white/75 text-[clamp(1rem,2.2vw,1.5rem)] font-light italic tracking-wide mt-6 mb-10 max-w-xl" style={{ willChange: "transform" }}>
-            "From royal palaces to Himalayan adventures"
-          </p>
+          <div ref={pxSubtitleRef} className="mt-6 mb-10">
+            <p className="hero-subtitle font-cormorant text-white/75 text-[clamp(1rem,2.2vw,1.5rem)] font-light italic tracking-wide max-w-xl">
+              "From royal palaces to Himalayan adventures"
+            </p>
+          </div>
 
-          <div ref={pxCTARef} className="hero-cta flex flex-col sm:flex-row items-center gap-4" style={{ willChange: "transform" }}>
+          <div ref={pxCTARef}>
+            <div className="hero-cta flex flex-col sm:flex-row items-center gap-4">
             <button
               data-testid="button-explore-hero"
               className="group flex items-center gap-3 bg-white text-black font-montserrat text-xs font-bold tracking-[0.2em] uppercase px-8 py-4 hover:bg-amber-100 transition-all duration-400"
@@ -483,6 +483,7 @@ export default function Home() {
             >
               View Destinations
             </button>
+          </div>
           </div>
         </motion.div>
 
