@@ -134,6 +134,13 @@ export default function Home() {
   const destinationsRef = useRef<HTMLDivElement>(null);
   const experiencesRef = useRef<HTMLDivElement>(null);
 
+  // ── Mouse parallax refs (one per depth layer)
+  const pxVideoBgRef  = useRef<HTMLDivElement>(null);
+  const pxGradientRef = useRef<HTMLDivElement>(null);
+  const pxTitleRef    = useRef<HTMLHeadingElement>(null);
+  const pxSubtitleRef = useRef<HTMLParagraphElement>(null);
+  const pxCTARef      = useRef<HTMLDivElement>(null);
+
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 600], [1, 0]);
   const heroY = useTransform(scrollY, [0, 600], [0, 120]);
@@ -143,6 +150,69 @@ export default function Home() {
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // ── Mouse parallax ── RAF-driven, disabled on touch/mobile
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (!heroRef.current) return;
+
+    const hero = heroRef.current;
+
+    // Layers: [ref, maxOffset px]
+    const layers: Array<[{ current: HTMLElement | null }, number]> = [
+      [pxVideoBgRef  as { current: HTMLElement | null }, 2 ],
+      [pxGradientRef as { current: HTMLElement | null }, 4 ],
+      [pxTitleRef    as { current: HTMLElement | null }, 8 ],
+      [pxSubtitleRef as { current: HTMLElement | null }, 10],
+      [pxCTARef      as { current: HTMLElement | null }, 12],
+    ];
+
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+    let rafId = 0;
+    const LERP = 0.07;
+
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = hero.getBoundingClientRect();
+      targetX = ((e.clientX - rect.left) / rect.width  - 0.5) * 2;
+      targetY = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
+    };
+
+    const onMouseLeave = () => { targetX = 0; targetY = 0; };
+
+    const tick = () => {
+      currentX = lerp(currentX, targetX, LERP);
+      currentY = lerp(currentY, targetY, LERP);
+      for (const [ref, max] of layers) {
+        const el = ref.current;
+        if (!el) continue;
+        const x = +(currentX * max).toFixed(3);
+        const y = +(currentY * max).toFixed(3);
+        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+
+    hero.addEventListener("mousemove", onMouseMove);
+    hero.addEventListener("mouseleave", onMouseLeave);
+
+    // Start after all GSAP entry animations finish (~2.4s) to avoid transform conflicts
+    const startTimer = setTimeout(() => {
+      rafId = requestAnimationFrame(tick);
+    }, 2700);
+
+    return () => {
+      hero.removeEventListener("mousemove", onMouseMove);
+      hero.removeEventListener("mouseleave", onMouseLeave);
+      clearTimeout(startTimer);
+      cancelAnimationFrame(rafId);
+      for (const [ref] of layers) {
+        if (ref.current) ref.current.style.transform = "";
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -301,7 +371,7 @@ export default function Home() {
       <section ref={heroRef} className="relative w-full h-screen overflow-hidden">
 
         {/* Background videos with crossfade — image fallback when video not ready */}
-        <div className="absolute inset-0">
+        <div ref={pxVideoBgRef} className="absolute inset-0" style={{ willChange: "transform" }}>
           {destinations.map((dest, i) => {
             const videoUrl = getVideoUrl(dest.name);
             const isActive = i === currentSlide;
@@ -356,8 +426,9 @@ export default function Home() {
         </div>
 
         {/* Gradient overlays */}
-        <div className="absolute inset-0 z-10" style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.92) 100%)"
+        <div ref={pxGradientRef} className="absolute inset-0 z-10" style={{
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.92) 100%)",
+          willChange: "transform",
         }} />
         <div className="absolute inset-0 z-10" style={{
           background: "linear-gradient(to right, rgba(0,0,0,0.3) 0%, transparent 40%)"
@@ -382,7 +453,7 @@ export default function Home() {
             <div className="w-8 h-px bg-white/50" />
           </div>
 
-          <h1 className="overflow-hidden mb-4">
+          <h1 ref={pxTitleRef} className="overflow-hidden mb-4" style={{ willChange: "transform" }}>
             <div className="hero-title-line font-cinzel text-[clamp(2.8rem,7vw,7rem)] font-bold text-white leading-[0.95] tracking-[0.02em]">
               Experience
             </div>
@@ -392,11 +463,11 @@ export default function Home() {
             </div>
           </h1>
 
-          <p className="hero-subtitle font-cormorant text-white/75 text-[clamp(1rem,2.2vw,1.5rem)] font-light italic tracking-wide mt-6 mb-10 max-w-xl">
+          <p ref={pxSubtitleRef} className="hero-subtitle font-cormorant text-white/75 text-[clamp(1rem,2.2vw,1.5rem)] font-light italic tracking-wide mt-6 mb-10 max-w-xl" style={{ willChange: "transform" }}>
             "From royal palaces to Himalayan adventures"
           </p>
 
-          <div className="hero-cta flex flex-col sm:flex-row items-center gap-4">
+          <div ref={pxCTARef} className="hero-cta flex flex-col sm:flex-row items-center gap-4" style={{ willChange: "transform" }}>
             <button
               data-testid="button-explore-hero"
               className="group flex items-center gap-3 bg-white text-black font-montserrat text-xs font-bold tracking-[0.2em] uppercase px-8 py-4 hover:bg-amber-100 transition-all duration-400"
