@@ -6,11 +6,9 @@ const PEXELS_API_KEY = process.env.PEXELS_API_KEY || "";
 
 const DESTINATION_QUERIES: Record<string, string> = {};
 
-// Pinned Pexels video IDs — fetched directly, bypassing search
+// Pinned Pexels video ID — single hero video
 const PINNED_VIDEO_IDS: Record<string, number> = {
-  "Taj Mahal": 4763824,
-  "Udaipur":   6981411,
-  "Ladakh":    5379990,
+  "Taj Mahal": 36518778,
 };
 
 const videoCache: Record<string, string> = {};
@@ -23,9 +21,11 @@ async function fetchPexelsVideoById(id: number): Promise<string | null> {
     });
     if (!res.ok) return null;
     const video: any = await res.json();
-    const files: any[] = video.video_files || [];
-    const hd = files.find((f: any) => f.quality === "hd" && f.file_type === "video/mp4")
-            || files.find((f: any) => f.file_type === "video/mp4");
+    const files: any[] = (video.video_files || []).filter((f: any) => f.file_type === "video/mp4");
+    if (!files.length) return null;
+    // Prefer "hd" quality tag; if absent, pick the highest-resolution file
+    const hd = files.find((f: any) => f.quality === "hd")
+            || files.sort((a: any, b: any) => (b.width || 0) - (a.width || 0))[0];
     return hd?.link ?? null;
   } catch {
     return null;

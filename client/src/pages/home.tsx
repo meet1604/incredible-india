@@ -18,41 +18,13 @@ const destinations = [
     color: "#d4a373",
     category: "Heritage",
   },
-  {
-    id: 2,
-    name: "Udaipur",
-    location: "Rajasthan",
-    tagline: "The City of Lakes",
-    description: "Palaces rising from mirror-still lakes, golden light on ancient stone, the city of kings reveals itself at dusk like a living dream.",
-    image: "https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?w=1920&q=85&auto=format&fit=crop",
-    color: "#e07a5f",
-    category: "Royal Heritage",
-  },
-  {
-    id: 3,
-    name: "Ladakh",
-    location: "Union Territory of Ladakh",
-    tagline: "Land of High Passes",
-    description: "Where the sky meets barren mountains, monasteries cling to ancient cliffs, and roads wind through the roof of the world.",
-    image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=1920&q=85&auto=format&fit=crop",
-    color: "#9c6b3c",
-    category: "Adventure",
-  },
 ];
 
 type Hotspot = { x: string; y: string; label: string; title: string; desc: string };
 const HOTSPOTS: Record<string, Hotspot[]> = {
   "Taj Mahal": [
-    { x: "50%", y: "42%", label: "UNESCO World Heritage", title: "Taj Mahal", desc: "Built over 22 years by 22,000 artisans, Emperor Shah Jahan's declaration of eternal love rises 73 metres above the Yamuna in pure white marble." },
-    { x: "50%", y: "66%", label: "Architectural Wonder", title: "Reflecting Pool", desc: "The long hauz-i-kausar pool creates the iconic mirror image of the dome — the symmetry that makes this monument unlike any other place on earth." },
-  ],
-  "Udaipur": [
-    { x: "37%", y: "38%", label: "Royal Heritage", title: "City Palace", desc: "Four centuries of Mewar royalty shaped this vast lakeside complex — a maze of royal apartments, inlaid marble courtyards, and towered ramparts." },
-    { x: "63%", y: "56%", label: "Natural Wonder", title: "Lake Pichola", desc: "Crafted by hand in 1362, this shimmering lake holds the Lake Palace afloat and earns Udaipur its name — the Venice of the East." },
-  ],
-  "Ladakh": [
-    { x: "44%", y: "46%", label: "World's Highest Pass", title: "Khardung La", desc: "At 5,359 metres, this legendary pass cuts through the Karakoram and links Leh to the silent Nubra Valley — a road that redefines the edge of the world." },
-    { x: "28%", y: "32%", label: "Karakoram Peaks", title: "Karakoram Range", desc: "The second-highest range on Earth, home to K2 and the Baltoro Glacier — a wilderness where geography becomes something close to philosophy." },
+    { x: "56%", y: "47%", label: "UNESCO World Heritage", title: "Taj Mahal", desc: "Built over 22 years by 22,000 artisans, Emperor Shah Jahan's declaration of eternal love rises 73 metres above the Yamuna in pure white marble." },
+    { x: "50%", y: "19%", label: "Sacred River", title: "Yamuna River", desc: "The sacred Yamuna has flowed behind the Taj for four centuries — its waters the eternal mirror Shah Jahan envisioned when he chose this very ground." },
   ],
 };
 
@@ -71,9 +43,7 @@ const stats = [
 ];
 
 export default function Home() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [prevSlide, setPrevSlide] = useState(-1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [currentSlide] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState<Record<number, boolean>>({});
@@ -93,28 +63,15 @@ export default function Home() {
 
 
   useEffect(() => {
-    destinations.forEach((dest, i) => {
-      const vid = videoRefs.current[i];
-      if (!vid) return;
-      const url = heroVideos?.[dest.name];
-      if (url && !vid.src) {
-        vid.src = url;
-        vid.load();
-      }
-      if (i === currentSlide) {
-        vid.currentTime = 0;
-        vid.play().catch(() => {});
-      } else {
-        vid.pause();
-        const nextIndex = (currentSlide + 1) % destinations.length;
-        if (i === nextIndex && url && !vid.src) {
-          vid.preload = "auto";
-          vid.src = url;
-          vid.load();
-        }
-      }
-    });
-  }, [currentSlide, heroVideos]);
+    const vid = videoRefs.current[0];
+    if (!vid) return;
+    const url = heroVideos?.["Taj Mahal"];
+    if (url && !vid.src) {
+      vid.src = url;
+      vid.load();
+    }
+    vid.play().catch(() => {});
+  }, [heroVideos]);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
@@ -194,19 +151,6 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isTransitioning) {
-        setPrevSlide(currentSlide);
-        setIsTransitioning(true);
-        setTimeout(() => {
-          setCurrentSlide((prev) => (prev + 1) % destinations.length);
-          setIsTransitioning(false);
-        }, 1200);
-      }
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [currentSlide, isTransitioning]);
 
   // ── Auto-cycle hotspot panels each time the slide changes
   useEffect(() => {
@@ -264,15 +208,6 @@ export default function Home() {
     return () => ctx.revert();
   }, []);
 
-  const goToSlide = (index: number) => {
-    if (index === currentSlide || isTransitioning) return;
-    setPrevSlide(currentSlide);
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentSlide(index);
-      setIsTransitioning(false);
-    }, 1000);
-  };
 
   return (
     <main className="bg-[#0a0a0a] text-white overflow-x-hidden" style={{ fontFamily: "Inter, sans-serif" }}>
@@ -358,28 +293,19 @@ export default function Home() {
       {/* ── Hero Section ── */}
       <section ref={heroRef} className="relative w-full h-screen overflow-hidden">
 
-        {/* Background videos with crossfade — image fallback when video not ready */}
+        {/* Background video — single hero with image fallback */}
         <div ref={pxVideoBgRef} className="absolute inset-0" style={{ willChange: "transform" }}>
-          {destinations.map((dest, i) => {
+          {(() => {
+            const dest = destinations[0];
             const videoUrl = getVideoUrl(dest.name);
-            const isActive = i === currentSlide;
-            const hasVideo = !!(videoUrl && videoLoaded[i]);
+            const hasVideo = !!(videoUrl && videoLoaded[0]);
             return (
-              <div
-                key={dest.id}
-                className="absolute inset-0"
-                style={{
-                  opacity: isActive ? 1 : 0,
-                  zIndex: isActive ? 1 : 0,
-                  transition: "opacity 1500ms ease-in-out",
-                  willChange: "opacity",
-                }}
-              >
-                {/* Fallback image — always rendered, hidden once video ready */}
+              <>
+                {/* Fallback image — hidden once video ready */}
                 <div
-                  className="absolute inset-0 will-change-transform"
+                  className="absolute inset-0"
                   style={{
-                    animation: isActive && !hasVideo ? "kenBurns 9s ease-out forwards" : "none",
+                    animation: !hasVideo ? "kenBurns 9s ease-out forwards" : "none",
                     backgroundImage: `url(${dest.image})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
@@ -389,15 +315,15 @@ export default function Home() {
                 />
                 {/* Video layer */}
                 <video
-                  ref={(el) => { videoRefs.current[i] = el; }}
-                  autoPlay={isActive}
+                  ref={(el) => { videoRefs.current[0] = el; }}
+                  autoPlay
                   muted
                   loop
                   playsInline
-                  preload={i === 0 ? "auto" : "none"}
+                  preload="auto"
                   onCanPlay={() => {
-                    setVideoLoaded((prev) => ({ ...prev, [i]: true }));
-                    if (isActive) videoRefs.current[i]?.play().catch(() => {});
+                    setVideoLoaded((prev) => ({ ...prev, [0]: true }));
+                    videoRefs.current[0]?.play().catch(() => {});
                   }}
                   className="absolute inset-0 w-full h-full"
                   style={{
@@ -408,9 +334,9 @@ export default function Home() {
                     transform: "translateZ(0)",
                   }}
                 />
-              </div>
+              </>
             );
-          })}
+          })()}
         </div>
 
 
@@ -596,21 +522,6 @@ export default function Home() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Slide dots */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
-          {destinations.map((_, i) => (
-            <button
-              key={i}
-              data-testid={`button-slide-${i}`}
-              onClick={() => goToSlide(i)}
-              className={`transition-all duration-500 rounded-full ${
-                i === currentSlide
-                  ? "w-8 h-1.5 bg-white"
-                  : "w-1.5 h-1.5 bg-white/30 hover:bg-white/60"
-              }`}
-            />
-          ))}
-        </div>
 
         {/* Destination label — character-split reveal */}
         <div className="absolute bottom-12 left-8 md:left-16 z-30">
