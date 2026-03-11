@@ -145,7 +145,7 @@ export default function Home() {
       curY += (tgtY - curY) * factor;
       // Raw floats — no toFixed() rounding which causes micro-jitter
       videoBg.style.transform =
-        `translate3d(${curX}px, ${curY}px, 0) scale(1.3)`;
+        `translate3d(${curX}px, ${curY}px, 0) scale(1.5)`;
       rafId = requestAnimationFrame(tick);
     };
 
