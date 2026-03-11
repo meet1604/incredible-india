@@ -119,55 +119,66 @@ export default function Home() {
   // ── Mouse parallax ── direct event handler, CSS transition for smooth lerp
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
-    if (!heroRef.current) return;
+    if (!heroRef.current || !pxVideoBgRef.current) return;
 
     const hero = heroRef.current;
+    const videoBg = pxVideoBgRef.current;
 
-    // [ref, depth multiplier (higher = more movement)]
-    const layers: Array<[React.RefObject<HTMLDivElement>, number]> = [
-      [pxVideoBgRef,  0.1],
-      [pxGradientRef, 0.2],
-    ];
+    // Apply baseline scale so panning never exposes edges
+    videoBg.style.willChange = "transform";
+    videoBg.style.transformOrigin = "center center";
 
-    // Enable CSS transition on all layer elements for smooth motion
-    for (const [ref] of layers) {
-      if (ref.current) {
-        ref.current.style.transition = "transform 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-        ref.current.style.willChange = "transform";
+    // Current (lerped) and target values
+    let curX = 0, curY = 0;
+    let tgtX = 0, tgtY = 0;
+    let rafId = 0;
+    let running = false;
+
+    const LERP = 0.06;   // lower = slower / more cinematic
+    const MAX  = 40;     // px
+
+    const tick = () => {
+      curX += (tgtX - curX) * LERP;
+      curY += (tgtY - curY) * LERP;
+      videoBg.style.transform = `translate3d(${curX.toFixed(3)}px, ${curY.toFixed(3)}px, 0) scale(1.1)`;
+
+      // Stop loop once settled at rest (within 0.05px of target)
+      if (Math.abs(tgtX - curX) < 0.05 && Math.abs(tgtY - curY) < 0.05 &&
+          Math.abs(tgtX) < 0.05 && Math.abs(tgtY) < 0.05) {
+        running = false;
+        return;
       }
-    }
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const startLoop = () => {
+      if (!running) {
+        running = true;
+        rafId = requestAnimationFrame(tick);
+      }
+    };
 
     const onMouseMove = (e: MouseEvent) => {
-      // Normalize to -1..+1 relative to window center
-      const x = (e.clientX / window.innerWidth  - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
-
-      for (const [ref, mult] of layers) {
-        const el = ref.current;
-        if (!el) continue;
-        el.style.transform = `translate3d(${(x * mult).toFixed(2)}px, ${(y * mult).toFixed(2)}px, 0)`;
-      }
+      tgtX = (e.clientX / window.innerWidth  - 0.5) * MAX * 2;
+      tgtY = (e.clientY / window.innerHeight - 0.5) * MAX * 2;
+      startLoop();
     };
 
     const onMouseLeave = () => {
-      for (const [ref] of layers) {
-        if (ref.current) ref.current.style.transform = "translate3d(0px, 0px, 0)";
-      }
+      tgtX = 0;
+      tgtY = 0;
+      startLoop();
     };
 
-    hero.addEventListener("mousemove", onMouseMove);
+    hero.addEventListener("mousemove",  onMouseMove);
     hero.addEventListener("mouseleave", onMouseLeave);
 
     return () => {
-      hero.removeEventListener("mousemove", onMouseMove);
+      cancelAnimationFrame(rafId);
+      hero.removeEventListener("mousemove",  onMouseMove);
       hero.removeEventListener("mouseleave", onMouseLeave);
-      for (const [ref] of layers) {
-        if (ref.current) {
-          ref.current.style.transform = "";
-          ref.current.style.transition = "";
-          ref.current.style.willChange = "";
-        }
-      }
+      videoBg.style.transform = "";
+      videoBg.style.willChange = "";
     };
   }, []);
 
