@@ -346,7 +346,7 @@ export default function Home() {
         {/* ── Time-synced hotspot markers — inside pan-layer so they track the video ── */}
         {(() => {
           const activeSpot = TIME_HOTSPOTS.find(h => videoTime >= h.timeStart && videoTime <= h.timeEnd) ?? null;
-          const panelVisible = !!activeSpot && (videoTime >= activeSpot.timeStart + 1.5 || hoverActive);
+          const panelVisible = !!activeSpot && hoverActive;
           const panelOnLeft = activeSpot ? parseFloat(activeSpot.x) > 55 : false;
           return (
             <AnimatePresence mode="wait">
@@ -386,16 +386,6 @@ export default function Home() {
                         }} />
                       </div>
                     ))}
-
-                    {/* ── Static outer decorative ring ── */}
-                    <div style={{
-                      position: "absolute", width: 28, height: 28,
-                      top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-                      borderRadius: "50%",
-                      border: `1px solid rgba(255,255,255,${panelVisible ? 0 : 0.55})`,
-                      transition: "border-color 0.4s ease, box-shadow 0.4s ease",
-                      pointerEvents: "none",
-                    }} />
 
                     {/* ── Active glow ring (panel open) ── */}
                     <AnimatePresence>
