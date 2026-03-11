@@ -119,14 +119,14 @@ export default function IndiaMap() {
               <path
                 key={i}
                 d={d}
-                fill={isHovered ? "#FF6B1A" : "#2a2a2a"}
-                stroke={isHovered ? "#FF8C42" : "#444444"}
+                fill={isHovered ? "#FACC15" : "#2a2a2a"}
+                stroke={isHovered ? "#FDE047" : "#444444"}
                 strokeWidth={isHovered ? 1.2 : 0.6}
                 style={{
                   transition: "fill 0.2s ease, stroke 0.2s ease",
                   cursor: "pointer",
                   filter: isHovered
-                    ? "drop-shadow(0 0 10px rgba(255,107,26,0.5))"
+                    ? "drop-shadow(0 0 10px rgba(250,204,21,0.5))"
                     : "none",
                 }}
                 onMouseEnter={(e) => {
@@ -179,7 +179,7 @@ export default function IndiaMap() {
               style={{
                 background: "rgba(8,8,8,0.92)",
                 backdropFilter: "blur(14px)",
-                border: "1px solid rgba(255,107,26,0.4)",
+                border: "1px solid rgba(250,204,21,0.4)",
                 borderRadius: 6,
                 padding: "8px 14px",
                 minWidth: 130,
@@ -198,7 +198,7 @@ export default function IndiaMap() {
                     fontSize: 8,
                     letterSpacing: "0.2em",
                     marginTop: 3,
-                    color: "#FF6B1A",
+                    color: "#FACC15",
                   }}
                 >
                   {tooltip.label}
