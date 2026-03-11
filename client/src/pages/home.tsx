@@ -4,7 +4,8 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronDown, MapPin, ArrowRight, Globe, Camera, Mountain, Waves, Star, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import IndiaMap from "@/components/IndiaMap";
+import IndiaMap, { IndiaMapHandle } from "@/components/IndiaMap";
+import KeralaOverlay from "@/components/KeralaOverlay";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -82,6 +83,9 @@ export default function Home() {
     if (url && !vid.src) { vid.src = url; vid.load(); }
     vid.play().catch(() => {});
   }, [heroVideos]);
+
+  const [keralaOpen, setKeralaOpen] = useState(false);
+  const indiaMapRef = useRef<IndiaMapHandle>(null);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
@@ -751,7 +755,10 @@ export default function Home() {
               className="relative w-full max-w-3xl"
               style={{ height: "clamp(460px, 70vw, 780px)" }}
             >
-              <IndiaMap />
+              <IndiaMap
+                ref={indiaMapRef}
+                onKeralaClick={() => setKeralaOpen(true)}
+              />
             </div>
           </motion.div>
         </div>
@@ -1133,6 +1140,14 @@ export default function Home() {
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         html { scroll-behavior: smooth; }
       `}</style>
+
+      <KeralaOverlay
+        isOpen={keralaOpen}
+        onClose={() => {
+          setKeralaOpen(false);
+          indiaMapRef.current?.resetZoom();
+        }}
+      />
     </main>
   );
 }

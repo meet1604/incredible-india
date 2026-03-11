@@ -1,0 +1,160 @@
+I want to add a new cinematic Kerala experience that opens when Kerala is clicked.
+Use **GSAP and ScrollTrigger for animations.
+
+
+1️⃣ Update Map Click Interaction
+Currently states only show hover interaction.
+Update the Kerala state click behavior.
+When the user clicks Kerala:
+Do NOT scroll to another section.
+Instead open a fullscreen Kerala experience overlay.
+
+
+2️⃣ Map Zoom Transition
+When Kerala is clicked:
+Create a cinematic zoom-in transition.
+Animation sequence:
+
+
+The India map smoothly zooms toward the Kerala region.
+
+
+Other parts of the map slightly fade.
+
+
+The zoom animation lasts around 1–1.5 seconds.
+
+
+After the zoom finishes, open the Kerala overlay section.
+
+
+This should feel like zooming into the state.
+
+
+3️⃣ Kerala Fullscreen Overlay
+Create a new component called:
+kerala-overlay
+Requirements:
+• Fullscreen overlay
+
+• Covers the entire viewport
+
+• Uses position: fixed
+
+• Hidden by default
+
+• Appears after map zoom animation
+Inside the Kerala overlay include:
+• Kerala hero background (image or video placeholder)
+
+• Title: Explore Kerala
+
+• Close button in the top corner
+Close button behavior:
+• Close overlay
+
+• Return to India map smoothly.
+
+
+4️⃣ Scroll Animation Inside Kerala Section
+Inside the Kerala overlay create a scroll-driven card animation inspired by the style of Arpeggio.
+Use ScrollTrigger.
+The Kerala section should have a long scroll height (~400vh) and a sticky container for animation.
+
+
+5️⃣ Card Animation Behavior
+Create 6 Kerala content cards.
+Cards should appear in pairs of two.
+Total animation cycles: 3.
+
+
+Card Appearance
+Each pair should:
+• Appear from bottom center
+
+• Sit side-by-side
+
+• Small gap between them (4–8px)
+
+
+6️⃣ Diagonal Spread Animation
+While scrolling:
+Left card:
+• Move diagonally up-left
+Right card:
+• Move diagonally up-right
+Cards move outward until reaching approximately 70% of the viewport width.
+
+
+7️⃣ After Reaching Edges
+Once cards reach the sides:
+• Stop horizontal movement
+
+• Continue moving upward with scroll
+
+
+8️⃣ Animation Sequence
+Sequence should be:
+Pair 1 appears
+
+Cards spread diagonally
+
+Cards move upward
+Pair 2 appears
+
+Cards spread diagonally
+
+Cards move upward
+Pair 3 appears
+
+Cards spread diagonally
+
+Cards move upward
+Then scrolling continues normally.
+
+
+9️⃣ Kerala Card Content
+Cards should contain image + title.
+Example topics:
+
+
+Kerala Backwaters
+
+
+Kathakali Dance
+
+
+Kerala Cuisine
+
+
+Munnar Tea Gardens
+
+
+Kovalam Beaches
+
+
+Kerala History
+
+
+
+10️⃣ Visual Style
+Cards should look modern and premium:
+• rounded corners
+
+• soft shadows
+
+• high quality images
+
+• slightly different card sizes for collage look
+
+• smooth easing animations.
+
+
+11️⃣ Important Constraints
+Do NOT break existing:
+• hero section
+
+• video interaction
+
+• India map hover behavior.
+Only extend the project by adding the Kerala experience.
