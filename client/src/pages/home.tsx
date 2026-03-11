@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronDown, MapPin, ArrowRight, Globe, Camera, Mountain, Waves, Star, Menu, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import IndiaMap from "@/components/IndiaMap";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -700,6 +701,125 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── India Map Section ── */}
+      <section id="map" className="relative bg-[#070707] py-24 md:py-32 overflow-hidden">
+        {/* Radial glow backdrop */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(201,151,58,0.06) 0%, transparent 70%)",
+          }}
+        />
+
+        <div className="max-w-screen-xl mx-auto px-6 md:px-10">
+          {/* Section header */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+            className="text-center mb-14 md:mb-18"
+          >
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="w-6 h-px bg-amber-400" />
+              <span className="font-montserrat text-amber-400 text-[10px] tracking-[0.4em] uppercase font-medium">Explore the Subcontinent</span>
+              <div className="w-6 h-px bg-amber-400" />
+            </div>
+            <h2 className="font-cinzel text-[clamp(2rem,5vw,4rem)] font-bold text-white leading-tight mb-4">
+              28 States,{" "}
+              <span style={{ WebkitTextFillColor: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.35)" }}>
+                One Soul
+              </span>
+            </h2>
+            <p className="font-inter text-white/45 text-base max-w-lg mx-auto leading-relaxed">
+              Hover over any state to discover India's extraordinary regional diversity — from Arctic highlands to equatorial backwaters.
+            </p>
+          </motion.div>
+
+          {/* Map + legend layout */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.1, ease: "easeOut", delay: 0.15 }}
+            className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16"
+          >
+            {/* Map container */}
+            <div
+              className="relative w-full lg:w-3/5 flex-shrink-0"
+              style={{ height: "clamp(420px, 65vw, 700px)" }}
+            >
+              {/* Subtle border frame */}
+              <div
+                className="absolute inset-0 rounded-sm pointer-events-none z-10"
+                style={{ border: "1px solid rgba(255,255,255,0.05)" }}
+              />
+              <IndiaMap />
+            </div>
+
+            {/* Legend / state highlights */}
+            <div className="w-full lg:w-2/5">
+              <div className="mb-6">
+                <span className="font-montserrat text-white/30 text-[9px] tracking-[0.35em] uppercase">Featured States</span>
+                <div className="w-8 h-px bg-amber-400/40 mt-2" />
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                {[
+                  { name: "Rajasthan",         label: "Desert Kingdom",          color: "#C9973A" },
+                  { name: "Kerala",             label: "God's Own Country",        color: "#4ade80" },
+                  { name: "Jammu and Kashmir",  label: "Heaven on Earth",          color: "#a78bfa" },
+                  { name: "Tamil Nadu",         label: "Land of Temples",          color: "#f87171" },
+                  { name: "Goa",                label: "Pearl of the Orient",      color: "#60a5fa" },
+                  { name: "Maharashtra",        label: "Gateway of India",         color: "#fb923c" },
+                  { name: "Himachal Pradesh",   label: "Dev Bhoomi",               color: "#93c5fd" },
+                  { name: "Karnataka",          label: "Silicon Valley of India",  color: "#e879f9" },
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.name}
+                    initial={{ opacity: 0, x: 18 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.05 * i, ease: "easeOut" }}
+                    className="flex items-center gap-3 group"
+                    data-testid={`map-state-${i}`}
+                  >
+                    <div
+                      className="flex-shrink-0 w-2 h-2 rounded-full"
+                      style={{ backgroundColor: s.color, boxShadow: `0 0 6px ${s.color}80` }}
+                    />
+                    <div className="flex-1 flex items-baseline justify-between border-b border-white/5 pb-2">
+                      <span className="font-cinzel text-white/80 text-xs font-semibold tracking-wide group-hover:text-white transition-colors duration-200">
+                        {s.name}
+                      </span>
+                      <span
+                        className="font-montserrat uppercase text-[8px] tracking-[0.2em] ml-3"
+                        style={{ color: s.color }}
+                      >
+                        {s.label}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Stats strip */}
+              <div className="mt-8 grid grid-cols-3 gap-4 pt-6 border-t border-white/6">
+                {[
+                  { value: "28", label: "States" },
+                  { value: "8", label: "UTs" },
+                  { value: "3.29M", label: "km²" },
+                ].map((s) => (
+                  <div key={s.label} className="text-center">
+                    <div className="font-cinzel text-2xl font-bold text-amber-400">{s.value}</div>
+                    <div className="font-montserrat text-white/35 text-[9px] tracking-[0.25em] uppercase mt-1">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
