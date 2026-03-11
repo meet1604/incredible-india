@@ -129,15 +129,23 @@ export default function Home() {
     let curX = 0, curY = 0;
     let tgtX = 0, tgtY = 0;
     let rafId: number;
+    let lastTs = 0;
 
-    const LERP = 0.07;
+    // Damping: 0.88 gives a smooth ~140ms settle time
+    // Delta-time based so it's identical on 60Hz, 120Hz, and 144Hz screens
+    const DAMPING = 0.88;
 
     // Loop always runs — no start/stop, no gaps between frames
-    const tick = () => {
-      curX += (tgtX - curX) * LERP;
-      curY += (tgtY - curY) * LERP;
+    const tick = (ts: number) => {
+      const delta   = lastTs ? Math.min(ts - lastTs, 50) : 16.67;
+      lastTs        = ts;
+      // Frame-rate independent exponential decay
+      const factor  = 1 - Math.pow(DAMPING, delta / 16.67);
+      curX += (tgtX - curX) * factor;
+      curY += (tgtY - curY) * factor;
+      // Raw floats — no toFixed() rounding which causes micro-jitter
       videoBg.style.transform =
-        `translate3d(${curX.toFixed(2)}px, ${curY.toFixed(2)}px, 0) scale(1.3)`;
+        `translate3d(${curX}px, ${curY}px, 0) scale(1.3)`;
       rafId = requestAnimationFrame(tick);
     };
 
