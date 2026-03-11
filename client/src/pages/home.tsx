@@ -446,7 +446,7 @@ export default function Home() {
                     videoRefs.current[currentSlide]?.play().catch(() => {});
                   }}
                 >
-                  {/* Pulsing outer ring */}
+                  {/* Pulsing outer ring — fades out when active */}
                   <div style={{
                     position: "absolute", width: 32, height: 32,
                     top: "50%", left: "50%", transform: "translate(-50%, -50%)",
@@ -455,20 +455,48 @@ export default function Home() {
                       width: "100%", height: "100%", borderRadius: "50%",
                       background: "rgba(255,255,255,0.28)",
                       animation: `hotspotPulse 2.8s ease-out infinite ${idx * 0.9}s`,
+                      opacity: isActive ? 0 : 1,
+                      transition: "opacity 0.4s ease",
                     }} />
                   </div>
+
+                  {/* Glow highlight ring — appears only when active */}
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        initial={{ scale: 0.4, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.4, opacity: 0 }}
+                        transition={{ duration: 0.45, ease: "easeOut" }}
+                        style={{
+                          position: "absolute", width: 40, height: 40,
+                          top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                          borderRadius: "50%",
+                          border: "1.5px solid rgba(255,255,255,0.9)",
+                          boxShadow: "0 0 14px rgba(255,255,255,0.5), 0 0 28px rgba(255,255,255,0.2)",
+                          pointerEvents: "none",
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
+
                   {/* Marker dot */}
                   <div style={{
                     position: "relative", width: 20, height: 20, borderRadius: "50%",
-                    background: "rgba(255,255,255,0.15)",
+                    background: isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.15)",
                     border: "1.5px solid rgba(255,255,255,0.85)",
                     backdropFilter: "blur(4px)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer",
-                    transition: "transform 0.2s ease, background 0.2s ease",
-                    ...(isActive && { transform: "scale(1.2)", background: "rgba(255,255,255,0.3)" }),
+                    boxShadow: isActive ? "0 0 18px rgba(255,255,255,0.65)" : "none",
+                    transform: isActive ? "scale(1.35)" : "scale(1)",
+                    transition: "transform 0.35s ease, background 0.35s ease, box-shadow 0.35s ease",
                   }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "white" }} />
+                    <div style={{
+                      width: 6, height: 6, borderRadius: "50%",
+                      background: isActive ? "rgba(0,0,0,0.75)" : "white",
+                      transition: "background 0.35s ease",
+                    }} />
                   </div>
                   {/* Description panel */}
                   <AnimatePresence>
