@@ -131,22 +131,24 @@ export default function Home() {
     let rafId: number;
 
     const LERP = 0.07;
-    const MAX  = 120;
 
     // Loop always runs — no start/stop, no gaps between frames
     const tick = () => {
       curX += (tgtX - curX) * LERP;
       curY += (tgtY - curY) * LERP;
       videoBg.style.transform =
-        `translate3d(${curX.toFixed(2)}px, ${curY.toFixed(2)}px, 0) scale(1.25)`;
+        `translate3d(${curX.toFixed(2)}px, ${curY.toFixed(2)}px, 0) scale(1.3)`;
       rafId = requestAnimationFrame(tick);
     };
 
     rafId = requestAnimationFrame(tick);
 
     const onMouseMove = (e: MouseEvent) => {
-      tgtX = -(e.clientX / window.innerWidth  - 0.5) * MAX * 2;
-      tgtY = -(e.clientY / window.innerHeight - 0.5) * MAX * 2;
+      // x/y in range -0.5 … +0.5 relative to screen centre
+      const x = e.clientX / window.innerWidth  - 0.5;
+      const y = e.clientY / window.innerHeight - 0.5;
+      tgtX = -x * 120;
+      tgtY = -y * 120;
     };
 
     const onMouseLeave = () => {
