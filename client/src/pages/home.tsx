@@ -429,6 +429,34 @@ export default function Home() {
                       }}
                     />
 
+                    {/* ── Always-visible title label below dot ── */}
+                    <motion.div
+                      animate={{ opacity: panelVisible ? 0 : 1 }}
+                      transition={{ duration: 0.25 }}
+                      style={{
+                        position: "absolute",
+                        top: "calc(50% + 16px)",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        textAlign: "center",
+                        whiteSpace: "nowrap",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <div
+                        className="font-cinzel text-white font-semibold"
+                        style={{ fontSize: 11, letterSpacing: "0.1em", textShadow: "0 1px 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.6)" }}
+                      >
+                        {activeSpot.title}
+                      </div>
+                      <div
+                        className="font-montserrat uppercase text-white/60"
+                        style={{ fontSize: 6.5, letterSpacing: "0.22em", marginTop: 3, textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}
+                      >
+                        {activeSpot.location}
+                      </div>
+                    </motion.div>
+
                     {/* ── Connector line with gradient ── */}
                     <AnimatePresence>
                       {panelVisible && (
