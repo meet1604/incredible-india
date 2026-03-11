@@ -40,6 +40,22 @@ const destinations = [
   },
 ];
 
+type Hotspot = { x: string; y: string; title: string; desc: string };
+const HOTSPOTS: Record<string, Hotspot[]> = {
+  "Taj Mahal": [
+    { x: "50%", y: "42%", title: "Taj Mahal", desc: "Built over 22 years by 22,000 artisans, Emperor Shah Jahan's declaration of eternal love rises 73 metres above the Yamuna river in pure white marble." },
+    { x: "50%", y: "66%", title: "Reflecting Pool", desc: "The long hauz-i-kausar pool creates the iconic mirror image of the dome — the symmetry that makes this monument unlike any other place on earth." },
+  ],
+  "Udaipur": [
+    { x: "37%", y: "38%", title: "City Palace", desc: "Four centuries of Mewar royalty shaped this vast lakeside complex — a maze of royal apartments, inlaid marble courtyards, and towered ramparts." },
+    { x: "63%", y: "56%", title: "Lake Pichola", desc: "Crafted by hand in 1362, this shimmering lake holds the Lake Palace afloat and earns Udaipur its reputation as the Venice of the East." },
+  ],
+  "Ladakh": [
+    { x: "44%", y: "46%", title: "Khardung La", desc: "At 5,359 metres, this legendary pass cuts through the Karakoram and links Leh to the silent Nubra Valley — a road that redefines the edge of the world." },
+    { x: "28%", y: "32%", title: "Karakoram Range", desc: "The second-highest range on Earth, home to K2 and the Baltoro Glacier. A wilderness where geography becomes something close to philosophy." },
+  ],
+};
+
 const experiences = [
   { icon: Mountain, title: "Adventure", description: "Trek glaciers, ski Himalayan slopes, white-water raft in the Zanskar valley.", count: "500+" },
   { icon: Camera, title: "Culture & Heritage", description: "3,000 years of living history, from ancient temples to royal palaces.", count: "40+" },
@@ -61,6 +77,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState<Record<number, boolean>>({});
+  const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
   const { data: heroVideos } = useQuery<Record<string, string | null>>({
@@ -379,6 +396,94 @@ export default function Home() {
         </div>
 
 
+
+        {/* ── Hotspot markers ── */}
+        <AnimatePresence>
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="absolute inset-0"
+            style={{ zIndex: 25, pointerEvents: "none" }}
+          >
+            {(HOTSPOTS[destinations[currentSlide]?.name] ?? []).map((spot, idx) => {
+              const hsKey = `${currentSlide}-${idx}`;
+              const isActive = activeHotspot === hsKey;
+              const panelOnLeft = parseFloat(spot.x) > 55;
+              return (
+                <div
+                  key={idx}
+                  className="absolute"
+                  style={{ left: spot.x, top: spot.y, transform: "translate(-50%, -50%)", pointerEvents: "auto" }}
+                  onMouseEnter={() => {
+                    setActiveHotspot(hsKey);
+                    videoRefs.current[currentSlide]?.pause();
+                  }}
+                  onMouseLeave={() => {
+                    setActiveHotspot(null);
+                    videoRefs.current[currentSlide]?.play().catch(() => {});
+                  }}
+                >
+                  {/* Pulsing outer ring */}
+                  <div style={{
+                    position: "absolute", width: 32, height: 32,
+                    top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                  }}>
+                    <div style={{
+                      width: "100%", height: "100%", borderRadius: "50%",
+                      background: "rgba(255,255,255,0.28)",
+                      animation: `hotspotPulse 2.8s ease-out infinite ${idx * 0.9}s`,
+                    }} />
+                  </div>
+                  {/* Marker dot */}
+                  <div style={{
+                    position: "relative", width: 20, height: 20, borderRadius: "50%",
+                    background: "rgba(255,255,255,0.15)",
+                    border: "1.5px solid rgba(255,255,255,0.85)",
+                    backdropFilter: "blur(4px)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer",
+                    transition: "transform 0.2s ease, background 0.2s ease",
+                    ...(isActive && { transform: "scale(1.2)", background: "rgba(255,255,255,0.3)" }),
+                  }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "white" }} />
+                  </div>
+                  {/* Description panel */}
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        transition={{ duration: 0.35, ease: "easeOut" }}
+                        style={{
+                          position: "absolute",
+                          ...(panelOnLeft ? { right: "calc(100% + 18px)" } : { left: "calc(100% + 18px)" }),
+                          top: "50%", transform: "translateY(-50%)",
+                          width: 240,
+                          background: "rgba(4, 4, 4, 0.84)",
+                          backdropFilter: "blur(20px)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          padding: "18px 20px",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <div className="font-cinzel text-white text-[11px] font-semibold tracking-[0.18em] uppercase mb-2.5">
+                          {spot.title}
+                        </div>
+                        <div className="font-cormorant text-white/70 leading-relaxed" style={{ fontSize: 15 }}>
+                          {spot.desc}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Slide dots */}
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3">
@@ -821,6 +926,11 @@ export default function Home() {
 
       {/* ── Global Styles ── */}
       <style>{`
+        @keyframes hotspotPulse {
+          0%   { transform: scale(1); opacity: 0.7; }
+          70%  { transform: scale(2.4); opacity: 0; }
+          100% { transform: scale(2.4); opacity: 0; }
+        }
         @keyframes kenBurns {
           0%   { transform: scale(1.08) translate(0px, 0px); }
           100% { transform: scale(1.18) translate(-15px, -8px); }
