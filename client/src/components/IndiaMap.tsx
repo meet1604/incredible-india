@@ -113,7 +113,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
 
     const centroid = pathGen.centroid(feature);
     const [cx, cy] = centroid;
-    const s = 48;
+    const s = 96;
     const tx = (size.w / 2 - cx) * (s - 1);
     const ty = (size.h / 2 - cy) * (s - 1);
 
