@@ -78,6 +78,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState<Record<number, boolean>>({});
   const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
+  const [autoHotspot, setAutoHotspot] = useState<number | null>(null);
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
   const { data: heroVideos } = useQuery<Record<string, string | null>>({
@@ -206,6 +207,23 @@ export default function Home() {
     }, 6000);
     return () => clearInterval(interval);
   }, [currentSlide, isTransitioning]);
+
+  // ── Auto-cycle hotspot panels each time the slide changes
+  useEffect(() => {
+    setAutoHotspot(null);
+    setActiveHotspot(null);
+    const spots = HOTSPOTS[destinations[currentSlide]?.name] ?? [];
+    if (spots.length === 0) return;
+
+    // Show first hotspot 1.8s after slide loads
+    const t1 = setTimeout(() => setAutoHotspot(0), 1800);
+    // Swap to second hotspot (if any) after another 3.5s
+    const t2 = spots.length > 1 ? setTimeout(() => setAutoHotspot(1), 5300) : undefined;
+    // Hide all after another 3.5s
+    const t3 = setTimeout(() => setAutoHotspot(null), spots.length > 1 ? 8800 : 5300);
+
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [currentSlide]);
 
   useEffect(() => {
     gsap.from(".scroll-indicator", { opacity: 0, y: -20, duration: 1, delay: 1, ease: "power3.out" });
@@ -410,7 +428,9 @@ export default function Home() {
           >
             {(HOTSPOTS[destinations[currentSlide]?.name] ?? []).map((spot, idx) => {
               const hsKey = `${currentSlide}-${idx}`;
-              const isActive = activeHotspot === hsKey;
+              // Active via hover OR via the auto-cycle timer (hover takes priority)
+              const isActive = activeHotspot === hsKey ||
+                (activeHotspot === null && autoHotspot === idx);
               const panelOnLeft = parseFloat(spot.x) > 55;
               return (
                 <div
