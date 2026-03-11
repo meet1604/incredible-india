@@ -5,7 +5,6 @@ import { storage } from "./storage";
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || "";
 
 const DESTINATION_QUERIES: Record<string, string> = {
-  "Udaipur":          "Udaipur lake palace India aerial",
   "Statue of Unity":  "Narmada river India aerial nature",
   "Kashmir":          "Kashmir valley India aerial",
   "Ladakh":           "Ladakh mountains India landscape aerial",
@@ -15,6 +14,7 @@ const DESTINATION_QUERIES: Record<string, string> = {
 // Pinned Pexels video IDs — fetched directly, bypassing search
 const PINNED_VIDEO_IDS: Record<string, number> = {
   "Taj Mahal": 4763824,
+  "Udaipur":   6981411,
 };
 
 const videoCache: Record<string, string> = {};
