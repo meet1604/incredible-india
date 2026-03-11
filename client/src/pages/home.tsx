@@ -739,85 +739,19 @@ export default function Home() {
             </p>
           </motion.div>
 
-          {/* Map + legend layout */}
+          {/* Map — full width, centred */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 1.1, ease: "easeOut", delay: 0.15 }}
-            className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16"
+            className="flex justify-center"
           >
-            {/* Map container */}
             <div
-              className="relative w-full lg:w-3/5 flex-shrink-0"
-              style={{ height: "clamp(420px, 65vw, 700px)" }}
+              className="relative w-full max-w-3xl"
+              style={{ height: "clamp(460px, 70vw, 780px)" }}
             >
-              {/* Subtle border frame */}
-              <div
-                className="absolute inset-0 rounded-sm pointer-events-none z-10"
-                style={{ border: "1px solid rgba(255,255,255,0.05)" }}
-              />
               <IndiaMap />
-            </div>
-
-            {/* Legend / state highlights */}
-            <div className="w-full lg:w-2/5">
-              <div className="mb-6">
-                <span className="font-montserrat text-white/30 text-[9px] tracking-[0.35em] uppercase">Featured States</span>
-                <div className="w-8 h-px bg-amber-400/40 mt-2" />
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                {[
-                  { name: "Rajasthan",         label: "Desert Kingdom",          color: "#C9973A" },
-                  { name: "Kerala",             label: "God's Own Country",        color: "#4ade80" },
-                  { name: "Jammu & Kashmir",    label: "Heaven on Earth",          color: "#a78bfa" },
-                  { name: "Tamil Nadu",         label: "Land of Temples",          color: "#f87171" },
-                  { name: "Goa",                label: "Pearl of the Orient",      color: "#60a5fa" },
-                  { name: "Maharashtra",        label: "Gateway of India",         color: "#fb923c" },
-                  { name: "Himachal Pradesh",   label: "Dev Bhoomi",               color: "#93c5fd" },
-                  { name: "Karnataka",          label: "Silicon Valley of India",  color: "#e879f9" },
-                ].map((s, i) => (
-                  <motion.div
-                    key={s.name}
-                    initial={{ opacity: 0, x: 18 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.05 * i, ease: "easeOut" }}
-                    className="flex items-center gap-3 group"
-                    data-testid={`map-state-${i}`}
-                  >
-                    <div
-                      className="flex-shrink-0 w-2 h-2 rounded-full"
-                      style={{ backgroundColor: s.color, boxShadow: `0 0 6px ${s.color}80` }}
-                    />
-                    <div className="flex-1 flex items-baseline justify-between border-b border-white/5 pb-2">
-                      <span className="font-cinzel text-white/80 text-xs font-semibold tracking-wide group-hover:text-white transition-colors duration-200">
-                        {s.name}
-                      </span>
-                      <span
-                        className="font-montserrat uppercase text-[8px] tracking-[0.2em] ml-3"
-                        style={{ color: s.color }}
-                      >
-                        {s.label}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Stats strip */}
-              <div className="mt-8 grid grid-cols-3 gap-4 pt-6 border-t border-white/6">
-                {[
-                  { value: "28", label: "States" },
-                  { value: "8", label: "UTs" },
-                  { value: "3.29M", label: "km²" },
-                ].map((s) => (
-                  <div key={s.label} className="text-center">
-                    <div className="font-cinzel text-2xl font-bold text-amber-400">{s.value}</div>
-                    <div className="font-montserrat text-white/35 text-[9px] tracking-[0.25em] uppercase mt-1">{s.label}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           </motion.div>
         </div>

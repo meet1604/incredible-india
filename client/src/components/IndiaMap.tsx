@@ -2,22 +2,36 @@ import { useState, useEffect, useRef } from "react";
 import { geoMercator, geoPath } from "d3-geo";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STATE_META: Record<string, { color: string; label: string }> = {
-  "Rajasthan":         { color: "#C9973A", label: "Desert Kingdom" },
-  "Kerala":            { color: "#4ade80", label: "God's Own Country" },
-  "Goa":               { color: "#60a5fa", label: "Pearl of the Orient" },
-  "Jammu & Kashmir":   { color: "#a78bfa", label: "Heaven on Earth" },
-  "Tamil Nadu":        { color: "#f87171", label: "Land of Temples" },
-  "Uttar Pradesh":     { color: "#fbbf24", label: "Heartland of India" },
-  "Maharashtra":       { color: "#fb923c", label: "Gateway of India" },
-  "West Bengal":       { color: "#34d399", label: "Cultural Capital" },
-  "Karnataka":         { color: "#e879f9", label: "Silicon Valley of India" },
-  "Gujarat":           { color: "#f59e0b", label: "Land of Gandhi" },
-  "Himachal Pradesh":  { color: "#93c5fd", label: "Dev Bhoomi" },
-  "Uttarakhand":       { color: "#6ee7b7", label: "Land of Gods" },
-  "Madhya Pradesh":    { color: "#fcd34d", label: "Heart of India" },
-  "Odisha":            { color: "#f9a8d4", label: "Soul of India" },
-  "Assam":             { color: "#86efac", label: "Land of Red River" },
+const STATE_LABELS: Record<string, string> = {
+  "Rajasthan":         "Desert Kingdom",
+  "Kerala":            "God's Own Country",
+  "Goa":               "Pearl of the Orient",
+  "Jammu & Kashmir":   "Heaven on Earth",
+  "Tamil Nadu":        "Land of Temples",
+  "Uttar Pradesh":     "Heartland of India",
+  "Maharashtra":       "Gateway of India",
+  "West Bengal":       "Cultural Capital",
+  "Karnataka":         "Silicon Valley of India",
+  "Gujarat":           "Land of Gandhi",
+  "Himachal Pradesh":  "Dev Bhoomi",
+  "Uttarakhand":       "Land of Gods",
+  "Madhya Pradesh":    "Heart of India",
+  "Odisha":            "Soul of India",
+  "Assam":             "Land of Red River",
+  "Punjab":            "Land of Five Rivers",
+  "Haryana":           "Green Revolution State",
+  "Bihar":             "Cradle of Civilisation",
+  "Chhattisgarh":      "Rice Bowl of India",
+  "Jharkhand":         "Land of Forests",
+  "Andhra Pradesh":    "Land of Spices",
+  "Telangana":         "City of Pearls",
+  "Sikkim":            "Land of Mystic Splendour",
+  "Meghalaya":         "Scotland of the East",
+  "Arunachal Pradesh": "Land of the Dawn-Lit Mountains",
+  "Manipur":           "Jewel of India",
+  "Nagaland":          "Land of Festivals",
+  "Mizoram":           "Land of the Blue Mountain",
+  "Tripura":           "Land of Fourteen Gods",
 };
 
 interface TooltipState {
@@ -98,7 +112,6 @@ export default function IndiaMap() {
         >
           {geoData.features.map((feature: any, i: number) => {
             const name: string = feature.properties?.ST_NM ?? "";
-            const meta = STATE_META[name];
             const isHovered = hovered === name;
             const d = pathGen(feature) ?? "";
 
@@ -106,26 +119,15 @@ export default function IndiaMap() {
               <path
                 key={i}
                 d={d}
-                fill={
-                  isHovered
-                    ? meta?.color ?? "rgba(255,255,255,0.28)"
-                    : meta
-                    ? `${meta.color}22`
-                    : "rgba(255,255,255,0.06)"
-                }
-                stroke={
-                  isHovered
-                    ? meta?.color ?? "rgba(255,255,255,0.6)"
-                    : "rgba(255,255,255,0.18)"
-                }
-                strokeWidth={isHovered ? 1.4 : 0.5}
+                fill={isHovered ? "#FF6B1A" : "#2a2a2a"}
+                stroke={isHovered ? "#FF8C42" : "#444444"}
+                strokeWidth={isHovered ? 1.2 : 0.6}
                 style={{
-                  transition: "fill 0.22s ease, stroke 0.22s ease, stroke-width 0.22s ease",
+                  transition: "fill 0.2s ease, stroke 0.2s ease",
                   cursor: "pointer",
-                  filter:
-                    isHovered && meta
-                      ? `drop-shadow(0 0 8px ${meta.color}60)`
-                      : "none",
+                  filter: isHovered
+                    ? "drop-shadow(0 0 10px rgba(255,107,26,0.5))"
+                    : "none",
                 }}
                 onMouseEnter={(e) => {
                   setHovered(name);
@@ -134,7 +136,7 @@ export default function IndiaMap() {
                     .getBoundingClientRect();
                   setTooltip({
                     name,
-                    label: meta?.label,
+                    label: STATE_LABELS[name],
                     x: e.clientX - rect.left,
                     y: e.clientY - rect.top,
                   });
@@ -144,9 +146,7 @@ export default function IndiaMap() {
                     .closest("svg")!
                     .getBoundingClientRect();
                   setTooltip((t) =>
-                    t
-                      ? { ...t, x: e.clientX - rect.left, y: e.clientY - rect.top }
-                      : t
+                    t ? { ...t, x: e.clientX - rect.left, y: e.clientY - rect.top } : t
                   );
                 }}
                 onMouseLeave={() => {
@@ -179,9 +179,7 @@ export default function IndiaMap() {
               style={{
                 background: "rgba(8,8,8,0.92)",
                 backdropFilter: "blur(14px)",
-                border: `1px solid ${
-                  STATE_META[tooltip.name]?.color ?? "rgba(255,255,255,0.15)"
-                }55`,
+                border: "1px solid rgba(255,107,26,0.4)",
                 borderRadius: 6,
                 padding: "8px 14px",
                 minWidth: 130,
@@ -200,8 +198,7 @@ export default function IndiaMap() {
                     fontSize: 8,
                     letterSpacing: "0.2em",
                     marginTop: 3,
-                    color:
-                      STATE_META[tooltip.name]?.color ?? "#C9973A",
+                    color: "#FF6B1A",
                   }}
                 >
                   {tooltip.label}
