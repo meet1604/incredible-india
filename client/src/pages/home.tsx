@@ -396,26 +396,43 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Destination label */}
-        <div className="absolute bottom-12 left-8 md:left-12 z-30">
+        {/* Destination label — cinematic title animation */}
+        <div className="absolute bottom-12 left-8 md:left-16 z-30">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, x: -15 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.7 }}
-              className="flex items-center gap-2"
-            >
-              <span className="inline-block w-1 h-6 rounded-full" style={{ backgroundColor: destinations[currentSlide]?.color }} />
-              <div>
-                <div className="font-cinzel text-white text-sm font-semibold tracking-wider">
-                  {destinations[currentSlide]?.name}
-                </div>
-                <div className="font-montserrat text-white/50 text-[10px] tracking-[0.2em] uppercase">
-                  {destinations[currentSlide]?.category}
-                </div>
-              </div>
+            <motion.div key={currentSlide} className="flex flex-col gap-3">
+
+              {/* Category eyebrow */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="font-montserrat text-white/50 text-[10px] tracking-[0.3em] uppercase"
+              >
+                {destinations[currentSlide]?.category}
+              </motion.div>
+
+              {/* Main title */}
+              <motion.h2
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="font-cinzel text-white"
+                style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)", fontWeight: 600, letterSpacing: "2px", lineHeight: 1.05 }}
+              >
+                {destinations[currentSlide]?.name}
+              </motion.h2>
+
+              {/* Animated underline */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                exit={{ scaleX: 0 }}
+                transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                style={{ transformOrigin: "left", height: "1px", backgroundColor: "white", width: "100%" }}
+              />
+
             </motion.div>
           </AnimatePresence>
         </div>
