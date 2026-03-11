@@ -6,11 +6,9 @@ const PEXELS_API_KEY = process.env.PEXELS_API_KEY || "";
 
 const DESTINATION_QUERIES: Record<string, string> = {};
 
-// Pinned Pexels video IDs — one per destination
+// Single pinned hero video — India scenic compilation
 const PINNED_VIDEO_IDS: Record<string, number> = {
-  "Taj Mahal": 36518778,
-  "Udaipur":   6981411,
-  "Ladakh":    5379990,
+  "Incredible India": 36518778,
 };
 
 const videoCache: Record<string, string> = {};
