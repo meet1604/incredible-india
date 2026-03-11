@@ -375,163 +375,243 @@ export default function Home() {
                       videoRefs.current[0]?.play().catch(() => {});
                     }}
                   >
-                    {/* Pulsing outer ring — fades out when panel is open */}
-                    <div style={{ position: "absolute", width: 36, height: 36, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                      <div style={{
-                        width: "100%", height: "100%", borderRadius: "50%",
-                        background: "rgba(255,255,255,0.25)",
-                        animation: "hotspotPulse 2.6s ease-out infinite",
-                        opacity: panelVisible ? 0 : 1,
-                        transition: "opacity 0.4s ease",
-                      }} />
-                    </div>
+                    {/* ── Pulsing rings (idle state) ── */}
+                    {[{ size: 42, delay: "0s", opacity: 0.22 }, { size: 62, delay: "0.8s", opacity: 0.11 }].map((r, i) => (
+                      <div key={i} style={{ position: "absolute", width: r.size, height: r.size, top: "50%", left: "50%", transform: "translate(-50%,-50%)", pointerEvents: "none" }}>
+                        <div style={{
+                          width: "100%", height: "100%", borderRadius: "50%",
+                          border: `1px solid rgba(255,255,255,${r.opacity * 2})`,
+                          background: `rgba(255,255,255,${r.opacity * 0.6})`,
+                          animation: `hotspotPulse 2.8s ease-out infinite ${r.delay}`,
+                          opacity: panelVisible ? 0 : 1,
+                          transition: "opacity 0.5s ease",
+                        }} />
+                      </div>
+                    ))}
 
-                    {/* Second slower ring for depth */}
-                    <div style={{ position: "absolute", width: 52, height: 52, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
-                      <div style={{
-                        width: "100%", height: "100%", borderRadius: "50%",
-                        background: "rgba(255,255,255,0.10)",
-                        animation: "hotspotPulse 2.6s ease-out infinite 0.7s",
-                        opacity: panelVisible ? 0 : 1,
-                        transition: "opacity 0.4s ease",
-                      }} />
-                    </div>
+                    {/* ── Static outer decorative ring ── */}
+                    <div style={{
+                      position: "absolute", width: 28, height: 28,
+                      top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+                      borderRadius: "50%",
+                      border: `1px solid rgba(255,255,255,${panelVisible ? 0 : 0.55})`,
+                      transition: "border-color 0.4s ease, box-shadow 0.4s ease",
+                      pointerEvents: "none",
+                    }} />
 
-                    {/* Glow ring — appears when panel is open */}
+                    {/* ── Active glow ring (panel open) ── */}
                     <AnimatePresence>
                       {panelVisible && (
                         <motion.div
-                          initial={{ scale: 0.4, opacity: 0 }}
+                          initial={{ scale: 0.5, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.4, opacity: 0 }}
-                          transition={{ duration: 0.45, ease: "easeOut" }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                          transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
                           style={{
-                            position: "absolute", width: 44, height: 44,
-                            top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                            position: "absolute", width: 34, height: 34,
+                            top: "50%", left: "50%", transform: "translate(-50%,-50%)",
                             borderRadius: "50%",
-                            border: "1.5px solid rgba(255,255,255,0.9)",
-                            boxShadow: "0 0 16px rgba(255,255,255,0.5), 0 0 32px rgba(255,255,255,0.2)",
+                            border: "1px solid rgba(255,255,255,0.9)",
+                            boxShadow: "0 0 0 3px rgba(255,255,255,0.08), 0 0 18px rgba(255,255,255,0.45), 0 0 40px rgba(255,255,255,0.15)",
                             pointerEvents: "none",
                           }}
                         />
                       )}
                     </AnimatePresence>
 
-                    {/* Marker dot */}
+                    {/* ── Crosshair tick marks (appear when active) ── */}
+                    {[
+                      { top: -10, left: "50%", w: 1, h: 6, tx: "-50%", ty: 0 },
+                      { bottom: -10, left: "50%", w: 1, h: 6, tx: "-50%", ty: 0 },
+                      { left: -10, top: "50%", w: 6, h: 1, tx: 0, ty: "-50%" },
+                      { right: -10, top: "50%", w: 6, h: 1, tx: 0, ty: "-50%" },
+                    ].map((tick, ti) => (
+                      <motion.div
+                        key={ti}
+                        animate={{ opacity: panelVisible ? 1 : 0, scale: panelVisible ? 1 : 0.4 }}
+                        transition={{ duration: 0.3, delay: panelVisible ? ti * 0.06 : 0, ease: "easeOut" }}
+                        style={{
+                          position: "absolute",
+                          width: tick.w, height: tick.h,
+                          ...(tick.top !== undefined ? { top: tick.top } : {}),
+                          ...(tick.bottom !== undefined ? { bottom: tick.bottom } : {}),
+                          ...(tick.left !== undefined ? { left: tick.left } : {}),
+                          ...(tick.right !== undefined ? { right: tick.right } : {}),
+                          transform: `translate(${tick.tx}, ${tick.ty})`,
+                          background: "rgba(255,255,255,0.75)",
+                          pointerEvents: "none",
+                        }}
+                      />
+                    ))}
+
+                    {/* ── Center dot ── */}
                     <div
                       data-testid="hotspot-dot"
                       style={{
-                        position: "relative", width: 20, height: 20, borderRadius: "50%",
-                        background: panelVisible ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.18)",
-                        border: "1.5px solid rgba(255,255,255,0.85)",
-                        backdropFilter: "blur(4px)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
+                        position: "relative", width: 12, height: 12, borderRadius: "50%",
+                        background: panelVisible
+                          ? "radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0.85) 100%)"
+                          : "radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 100%)",
+                        boxShadow: panelVisible
+                          ? "0 0 0 2px rgba(255,255,255,0.25), 0 0 14px rgba(255,255,255,0.8)"
+                          : "0 0 6px rgba(255,255,255,0.4)",
                         cursor: "pointer",
-                        boxShadow: panelVisible ? "0 0 20px rgba(255,255,255,0.7)" : "none",
-                        transform: panelVisible ? "scale(1.35)" : "scale(1)",
+                        transform: panelVisible ? "scale(1.2)" : "scale(1)",
                         transition: "transform 0.35s ease, background 0.35s ease, box-shadow 0.35s ease",
                       }}
-                    >
-                      <div style={{
-                        width: 6, height: 6, borderRadius: "50%",
-                        background: panelVisible ? "rgba(0,0,0,0.75)" : "white",
-                        transition: "background 0.35s ease",
-                      }} />
-                    </div>
+                    />
 
-                    {/* Connector line — draws out from dot to panel edge */}
+                    {/* ── Connector line with gradient ── */}
                     <AnimatePresence>
                       {panelVisible && (
                         <motion.div
                           initial={{ scaleX: 0 }}
                           animate={{ scaleX: 1 }}
-                          exit={{ scaleX: 0, transition: { duration: 0.18 } }}
-                          transition={{ duration: 0.32, ease: "easeOut" }}
+                          exit={{ scaleX: 0, transition: { duration: 0.15 } }}
+                          transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
                           style={{
-                            position: "absolute", top: "50%",
+                            position: "absolute", top: "50%", marginTop: -0.5,
                             ...(panelOnLeft ? { right: "50%", transformOrigin: "right" } : { left: "50%", transformOrigin: "left" }),
-                            width: 44, height: 1,
-                            backgroundColor: "rgba(255,255,255,0.5)",
+                            width: 52, height: 1,
+                            background: panelOnLeft
+                              ? "linear-gradient(to left, rgba(255,255,255,0.6), rgba(255,255,255,0.1))"
+                              : "linear-gradient(to right, rgba(255,255,255,0.6), rgba(255,255,255,0.1))",
                             pointerEvents: "none",
                           }}
                         />
                       )}
                     </AnimatePresence>
 
-                    {/* Info panel — slides in from the side */}
+                    {/* ── Glassmorphism info panel ── */}
                     <AnimatePresence>
                       {panelVisible && (
                         <motion.div
                           key={activeSpot.title}
-                          initial={{ opacity: 0, x: panelOnLeft ? 16 : -16 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: panelOnLeft ? 16 : -16, transition: { duration: 0.2 } }}
-                          transition={{ duration: 0.44, ease: [0.25, 0.46, 0.45, 0.94] }}
+                          initial={{ opacity: 0, x: panelOnLeft ? 18 : -18, filter: "blur(4px)" }}
+                          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                          exit={{ opacity: 0, x: panelOnLeft ? 18 : -18, filter: "blur(4px)", transition: { duration: 0.18 } }}
+                          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
                           data-testid="hotspot-panel"
                           style={{
                             position: "absolute",
-                            ...(panelOnLeft ? { right: "calc(50% + 44px)" } : { left: "calc(50% + 44px)" }),
+                            ...(panelOnLeft ? { right: "calc(50% + 52px)" } : { left: "calc(50% + 52px)" }),
                             top: "50%", transform: "translateY(-50%)",
-                            width: 272,
-                            background: "rgba(5, 5, 5, 0.92)",
-                            backdropFilter: "blur(32px)",
-                            borderTop: "1px solid rgba(255,255,255,0.13)",
-                            borderBottom: "1px solid rgba(255,255,255,0.07)",
-                            ...(panelOnLeft
-                              ? { borderRight: "1px solid rgba(255,255,255,0.07)" }
-                              : { borderLeft: "1px solid rgba(255,255,255,0.07)" }),
-                            padding: "20px 22px 18px",
+                            width: 290,
+                            background: "linear-gradient(135deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.06) 60%, rgba(255,255,255,0.04) 100%)",
+                            backdropFilter: "blur(24px) saturate(160%)",
+                            WebkitBackdropFilter: "blur(24px) saturate(160%)",
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            borderRadius: 2,
+                            boxShadow: "0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.12) inset, 0 -1px 0 rgba(0,0,0,0.2) inset",
+                            overflow: "hidden",
                             pointerEvents: "none",
                           }}
                         >
-                          {/* Category label */}
-                          <div className="font-montserrat text-white/38 text-[7.5px] tracking-[0.32em] uppercase mb-1">
-                            {activeSpot.label}
-                          </div>
-
-                          {/* Location sub-label */}
-                          <div className="font-montserrat text-white/28 text-[7px] tracking-[0.18em] uppercase mb-3">
-                            {activeSpot.location}
-                          </div>
-
-                          {/* Title */}
-                          <div className="font-cinzel text-white font-semibold tracking-wide mb-3" style={{ fontSize: 14 }}>
-                            {activeSpot.title}
-                          </div>
-
-                          {/* Divider — draws in */}
+                          {/* Gold accent bar at top */}
                           <motion.div
                             initial={{ scaleX: 0 }}
                             animate={{ scaleX: 1 }}
-                            transition={{ duration: 0.55, delay: 0.15, ease: "easeOut" }}
-                            style={{ height: 1, backgroundColor: "rgba(255,255,255,0.12)", transformOrigin: "left", marginBottom: 13 }}
+                            transition={{ duration: 0.6, ease: "easeOut" }}
+                            style={{
+                              height: 2, width: "100%", transformOrigin: panelOnLeft ? "right" : "left",
+                              background: "linear-gradient(90deg, #C9973A, #F0C060, #C9973A)",
+                              opacity: 0.85,
+                            }}
                           />
 
-                          {/* Description — word-by-word reveal */}
-                          <div className="font-cormorant text-white/60 leading-relaxed" style={{ fontSize: 14.5 }}>
-                            {activeSpot.desc.split(" ").map((word, wi) => (
-                              <motion.span
-                                key={wi}
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: 0.2 + wi * 0.05, ease: "easeOut" }}
-                                style={{ display: "inline-block", marginRight: "0.28em" }}
-                              >
-                                {word}
-                              </motion.span>
-                            ))}
-                          </div>
+                          <div style={{ padding: "18px 22px 20px" }}>
+                            {/* Category chip */}
+                            <motion.div
+                              initial={{ opacity: 0, y: -6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.35, delay: 0.1 }}
+                              style={{
+                                display: "inline-flex", alignItems: "center",
+                                border: "1px solid rgba(255,255,255,0.2)",
+                                borderRadius: 1,
+                                padding: "3px 8px",
+                                marginBottom: 10,
+                                background: "rgba(255,255,255,0.07)",
+                              }}
+                            >
+                              <span className="font-montserrat text-white/55 tracking-[0.25em] uppercase" style={{ fontSize: 7 }}>
+                                {activeSpot.label}
+                              </span>
+                            </motion.div>
 
-                          {/* Explore CTA */}
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.35, delay: 0.6 }}
-                            data-testid="hotspot-explore-cta"
-                            className="font-montserrat text-white/42 text-[8px] tracking-[0.24em] uppercase mt-4 flex items-center gap-1.5"
-                          >
-                            Explore <span style={{ fontSize: 10, letterSpacing: 0 }}>→</span>
-                          </motion.div>
+                            {/* Title */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.4, delay: 0.15, ease: "easeOut" }}
+                              className="font-cinzel text-white font-semibold leading-tight"
+                              style={{ fontSize: 18, letterSpacing: "0.04em", marginBottom: 4 }}
+                            >
+                              {activeSpot.title}
+                            </motion.div>
+
+                            {/* Location line */}
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.35, delay: 0.22 }}
+                              className="font-montserrat tracking-[0.16em] uppercase"
+                              style={{ fontSize: 7.5, color: "rgba(200,160,80,0.8)", marginBottom: 14 }}
+                            >
+                              {activeSpot.location}
+                            </motion.div>
+
+                            {/* Divider */}
+                            <motion.div
+                              initial={{ scaleX: 0 }}
+                              animate={{ scaleX: 1 }}
+                              transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+                              style={{
+                                height: 1, transformOrigin: "left", marginBottom: 14,
+                                background: "linear-gradient(to right, rgba(255,255,255,0.2), rgba(255,255,255,0.04))",
+                              }}
+                            />
+
+                            {/* Description — word-by-word */}
+                            <div className="font-cormorant leading-relaxed" style={{ fontSize: 15, color: "rgba(255,255,255,0.72)" }}>
+                              {activeSpot.desc.split(" ").map((word, wi) => (
+                                <motion.span
+                                  key={wi}
+                                  initial={{ opacity: 0, y: 6 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.3, delay: 0.28 + wi * 0.045, ease: "easeOut" }}
+                                  style={{ display: "inline-block", marginRight: "0.28em" }}
+                                >
+                                  {word}
+                                </motion.span>
+                              ))}
+                            </div>
+
+                            {/* Explore CTA */}
+                            <motion.div
+                              initial={{ opacity: 0, x: -6 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.38, delay: 0.65 }}
+                              data-testid="hotspot-explore-cta"
+                              style={{
+                                marginTop: 18,
+                                display: "flex", alignItems: "center", gap: 8,
+                                borderTop: "1px solid rgba(255,255,255,0.1)",
+                                paddingTop: 14,
+                              }}
+                            >
+                              <span className="font-montserrat tracking-[0.26em] uppercase" style={{ fontSize: 7.5, color: "rgba(200,160,80,0.85)" }}>
+                                Explore
+                              </span>
+                              <motion.span
+                                animate={{ x: [0, 4, 0] }}
+                                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+                                style={{ color: "rgba(200,160,80,0.75)", fontSize: 11 }}
+                              >
+                                →
+                              </motion.span>
+                            </motion.div>
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
