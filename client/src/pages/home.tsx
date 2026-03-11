@@ -20,13 +20,25 @@ const destinations = [
   },
 ];
 
-type Hotspot = { x: string; y: string; label: string; title: string; desc: string };
-const HOTSPOTS: Record<string, Hotspot[]> = {
-  "Incredible India": [
-    { x: "57%", y: "46%", label: "UNESCO World Heritage · Agra", title: "Taj Mahal", desc: "Built over 22 years by 22,000 artisans — Shah Jahan's declaration of eternal love in white marble rises 73 metres above the sacred Yamuna river." },
-    { x: "50%", y: "18%", label: "Sacred Waters", title: "Yamuna River", desc: "Flowing behind the Taj for four centuries, the Yamuna was the mirror Shah Jahan envisioned — a river that turned one building into an infinity." },
-  ],
-};
+// One hotspot per video scene — timeStart/timeEnd in seconds (video = 119s, 15 scenes ≈ 7.9s each)
+type TimeHotspot = { timeStart: number; timeEnd: number; x: string; y: string; label: string; title: string; location: string; desc: string };
+const TIME_HOTSPOTS: TimeHotspot[] = [
+  { timeStart: 0,    timeEnd: 7.5,  x: "57%", y: "46%", label: "UNESCO World Heritage", title: "Taj Mahal",          location: "Agra, Uttar Pradesh",        desc: "Built over 22 years by 22,000 artisans — Shah Jahan's eternal declaration of love rises 73 metres in pure white marble above the sacred Yamuna." },
+  { timeStart: 8,    timeEnd: 15.5, x: "63%", y: "37%", label: "Ancient Buddhist Monastery", title: "Key Monastery", location: "Spiti Valley, Himachal Pradesh", desc: "Clinging to a rocky cliff at 4,166 metres, Key Monastery has stood for 1,000 years as one of the world's highest places of Buddhist learning." },
+  { timeStart: 16,   timeEnd: 23.5, x: "50%", y: "33%", label: "The Great Himalayas",   title: "Himalayan Peaks",   location: "Northern India",              desc: "The highest mountain range on Earth — a 2,500 km wall of ice and stone that shapes the climate, culture and spirituality of an entire subcontinent." },
+  { timeStart: 24,   timeEnd: 31.5, x: "44%", y: "56%", label: "Mountain Highway",      title: "Manali Road",       location: "Himachal Pradesh",            desc: "One of the world's highest motorable passes winds through snow-dusted pine forests — a road where every bend reveals a view that doesn't exist elsewhere." },
+  { timeStart: 32,   timeEnd: 39.5, x: "52%", y: "52%", label: "Spiritual Capital of India", title: "Varanasi Ghats", location: "Varanasi, Uttar Pradesh",   desc: "The oldest living city on Earth. At the Ghats of the Ganges, faith, fire and river meet every dawn — a ritual unchanged for 3,000 years." },
+  { timeStart: 40,   timeEnd: 47.5, x: "50%", y: "46%", label: "Icon of Modern India",  title: "Bandra-Worli Sea Link", location: "Mumbai, Maharashtra",     desc: "Eight lanes of concrete arching 5.6 km across the Arabian Sea — Mumbai's most recognisable silhouette and an engineering marvel of the 21st century." },
+  { timeStart: 48,   timeEnd: 55.5, x: "50%", y: "54%", label: "Western Ghats · UNESCO", title: "Sahyadri Canyon",  location: "Maharashtra",                desc: "A UNESCO biodiversity hotspot: these ancient volcanic gorges funnel monsoon mist into cascading waterfalls and shelter species found nowhere else on Earth." },
+  { timeStart: 56,   timeEnd: 63.5, x: "34%", y: "62%", label: "Sunshine Coast",        title: "Goa Beach",         location: "Goa",                         desc: "700 km of coastline where golden sand meets the Arabian Sea, framed by coconut palms — India's most celebrated coast, radiant year-round." },
+  { timeStart: 64,   timeEnd: 71.5, x: "52%", y: "54%", label: "City of Lakes",         title: "Lake Pichola",      location: "Udaipur, Rajasthan",          desc: "Crafted by hand in 1362, Lake Pichola holds the Lake Palace afloat like a marble dream — earning Udaipur its title as the Venice of the East." },
+  { timeStart: 72,   timeEnd: 79.5, x: "58%", y: "48%", label: "Royal Rajputana Heritage", title: "City Palace",    location: "Udaipur, Rajasthan",          desc: "Four centuries of Mewar royalty shaped this lakeside complex — glowing amber at dusk, its reflection turning the lake into a canvas of liquid gold." },
+  { timeStart: 80,   timeEnd: 87.5, x: "42%", y: "44%", label: "The Blue City",         title: "Jodhpur",           location: "Jodhpur, Rajasthan",          desc: "A sea of indigo-painted houses clusters below a sandstone fortress — the blue, once reserved for Brahmin homes, is now the identity of an entire city." },
+  { timeStart: 88,   timeEnd: 95.5, x: "52%", y: "37%", label: "Rajasthan's Iron Fort", title: "Mehrangarh Fort",   location: "Jodhpur, Rajasthan",          desc: "Rising 125 metres on a sheer cliff above the Blue City, Mehrangarh is one of India's largest forts — its walls still bear the marks of cannonballs." },
+  { timeStart: 96,   timeEnd: 103.5, x: "42%", y: "62%", label: "Wildlife Sanctuary",   title: "Asian Elephant",   location: "Central India",               desc: "India is home to 60% of Asia's wild elephants. These ancient forest giants roam corridors of sal and teak — living bridges between wilderness and wonder." },
+  { timeStart: 104,  timeEnd: 111.5, x: "50%", y: "58%", label: "God's Own Country",    title: "Munnar Tea Gardens", location: "Kerala",                      desc: "Terraced emerald hills ripple to the horizon at 1,600 metres — Kerala's tea gardens produce some of the world's finest high-altitude leaf in perpetual golden mist." },
+  { timeStart: 112,  timeEnd: 119,   x: "50%", y: "54%", label: "Backwater Highlands",  title: "Kerala Hills",     location: "Kerala",                      desc: "As the sun drops behind the Western Ghats, light turns the winding roads of Kerala's highlands to copper — a final, quiet panorama before night falls." },
+];
 
 const experiences = [
   { icon: Mountain, title: "Adventure", description: "Trek glaciers, ski Himalayan slopes, white-water raft in the Zanskar valley.", count: "500+" },
@@ -47,8 +59,8 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState<Record<number, boolean>>({});
-  const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
-  const [autoHotspot, setAutoHotspot] = useState<number | null>(null);
+  const [hoverActive, setHoverActive] = useState(false);
+  const [videoTime, setVideoTime] = useState(0);
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
 
   const { data: heroVideos } = useQuery<Record<string, string | null>>({
@@ -149,22 +161,21 @@ export default function Home() {
   }, []);
 
 
-  // ── Auto-cycle hotspot panels each time the slide changes
+  // ── Track video playback time via rAF (0.5s bucket → minimal re-renders)
   useEffect(() => {
-    setAutoHotspot(null);
-    setActiveHotspot(null);
-    const spots = HOTSPOTS[destinations[currentSlide]?.name] ?? [];
-    if (spots.length === 0) return;
-
-    // Show first hotspot 1.8s after slide loads
-    const t1 = setTimeout(() => setAutoHotspot(0), 1800);
-    // Swap to second hotspot (if any) after another 3.5s
-    const t2 = spots.length > 1 ? setTimeout(() => setAutoHotspot(1), 5300) : undefined;
-    // Hide all after another 3.5s
-    const t3 = setTimeout(() => setAutoHotspot(null), spots.length > 1 ? 8800 : 5300);
-
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [currentSlide]);
+    let rafId: number;
+    let lastBucket = -1;
+    const tick = () => {
+      const vid = videoRefs.current[0];
+      if (vid) {
+        const bucket = Math.floor(vid.currentTime * 2);
+        if (bucket !== lastBucket) { lastBucket = bucket; setVideoTime(vid.currentTime); }
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   useEffect(() => {
     gsap.from(".scroll-indicator", { opacity: 0, y: -20, duration: 1, delay: 1, ease: "power3.out" });
@@ -334,186 +345,202 @@ export default function Home() {
 
 
 
-        {/* ── Hotspot markers ── */}
-        <AnimatePresence>
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="absolute inset-0"
-            style={{ zIndex: 25, pointerEvents: "none" }}
-          >
-            {(HOTSPOTS[destinations[currentSlide]?.name] ?? []).map((spot, idx) => {
-              const hsKey = `${currentSlide}-${idx}`;
-              // Active via hover OR via the auto-cycle timer (hover takes priority)
-              const isActive = activeHotspot === hsKey ||
-                (activeHotspot === null && autoHotspot === idx);
-              const panelOnLeft = parseFloat(spot.x) > 55;
-              return (
-                <div
-                  key={idx}
-                  className="absolute"
-                  style={{ left: spot.x, top: spot.y, transform: "translate(-50%, -50%)", pointerEvents: "auto" }}
-                  onMouseEnter={() => {
-                    setActiveHotspot(hsKey);
-                    videoRefs.current[currentSlide]?.pause();
-                  }}
-                  onMouseLeave={() => {
-                    setActiveHotspot(null);
-                    videoRefs.current[currentSlide]?.play().catch(() => {});
-                  }}
+        {/* ── Time-synced hotspot markers ── */}
+        {(() => {
+          const activeSpot = TIME_HOTSPOTS.find(h => videoTime >= h.timeStart && videoTime <= h.timeEnd) ?? null;
+          const panelVisible = !!activeSpot && (videoTime >= activeSpot.timeStart + 1.5 || hoverActive);
+          const panelOnLeft = activeSpot ? parseFloat(activeSpot.x) > 55 : false;
+          return (
+            <AnimatePresence mode="wait">
+              {activeSpot && (
+                <motion.div
+                  key={activeSpot.timeStart}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.45 }}
+                  className="absolute inset-0"
+                  style={{ zIndex: 25, pointerEvents: "none" }}
                 >
-                  {/* Pulsing outer ring — fades out when active */}
-                  <div style={{
-                    position: "absolute", width: 32, height: 32,
-                    top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-                  }}>
-                    <div style={{
-                      width: "100%", height: "100%", borderRadius: "50%",
-                      background: "rgba(255,255,255,0.28)",
-                      animation: `hotspotPulse 2.8s ease-out infinite ${idx * 0.9}s`,
-                      opacity: isActive ? 0 : 1,
-                      transition: "opacity 0.4s ease",
-                    }} />
-                  </div>
+                  <div
+                    data-testid={`hotspot-${activeSpot.title.replace(/\s+/g, "-").toLowerCase()}`}
+                    className="absolute"
+                    style={{ left: activeSpot.x, top: activeSpot.y, transform: "translate(-50%, -50%)", pointerEvents: "auto" }}
+                    onMouseEnter={() => {
+                      setHoverActive(true);
+                      videoRefs.current[0]?.pause();
+                    }}
+                    onMouseLeave={() => {
+                      setHoverActive(false);
+                      videoRefs.current[0]?.play().catch(() => {});
+                    }}
+                  >
+                    {/* Pulsing outer ring — fades out when panel is open */}
+                    <div style={{ position: "absolute", width: 36, height: 36, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                      <div style={{
+                        width: "100%", height: "100%", borderRadius: "50%",
+                        background: "rgba(255,255,255,0.25)",
+                        animation: "hotspotPulse 2.6s ease-out infinite",
+                        opacity: panelVisible ? 0 : 1,
+                        transition: "opacity 0.4s ease",
+                      }} />
+                    </div>
 
-                  {/* Glow highlight ring — appears only when active */}
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        initial={{ scale: 0.4, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.4, opacity: 0 }}
-                        transition={{ duration: 0.45, ease: "easeOut" }}
-                        style={{
-                          position: "absolute", width: 40, height: 40,
-                          top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-                          borderRadius: "50%",
-                          border: "1.5px solid rgba(255,255,255,0.9)",
-                          boxShadow: "0 0 14px rgba(255,255,255,0.5), 0 0 28px rgba(255,255,255,0.2)",
-                          pointerEvents: "none",
-                        }}
-                      />
-                    )}
-                  </AnimatePresence>
+                    {/* Second slower ring for depth */}
+                    <div style={{ position: "absolute", width: 52, height: 52, top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}>
+                      <div style={{
+                        width: "100%", height: "100%", borderRadius: "50%",
+                        background: "rgba(255,255,255,0.10)",
+                        animation: "hotspotPulse 2.6s ease-out infinite 0.7s",
+                        opacity: panelVisible ? 0 : 1,
+                        transition: "opacity 0.4s ease",
+                      }} />
+                    </div>
 
-                  {/* Marker dot */}
-                  <div style={{
-                    position: "relative", width: 20, height: 20, borderRadius: "50%",
-                    background: isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.15)",
-                    border: "1.5px solid rgba(255,255,255,0.85)",
-                    backdropFilter: "blur(4px)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer",
-                    boxShadow: isActive ? "0 0 18px rgba(255,255,255,0.65)" : "none",
-                    transform: isActive ? "scale(1.35)" : "scale(1)",
-                    transition: "transform 0.35s ease, background 0.35s ease, box-shadow 0.35s ease",
-                  }}>
-                    <div style={{
-                      width: 6, height: 6, borderRadius: "50%",
-                      background: isActive ? "rgba(0,0,0,0.75)" : "white",
-                      transition: "background 0.35s ease",
-                    }} />
-                  </div>
-                  {/* Connector line — draws from dot to panel */}
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        exit={{ scaleX: 0, transition: { duration: 0.18 } }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        style={{
-                          position: "absolute",
-                          top: "50%",
-                          ...(panelOnLeft
-                            ? { right: "50%", transformOrigin: "right" }
-                            : { left: "50%", transformOrigin: "left" }),
-                          width: 40,
-                          height: 1,
-                          backgroundColor: "rgba(255,255,255,0.55)",
-                          pointerEvents: "none",
-                        }}
-                      />
-                    )}
-                  </AnimatePresence>
+                    {/* Glow ring — appears when panel is open */}
+                    <AnimatePresence>
+                      {panelVisible && (
+                        <motion.div
+                          initial={{ scale: 0.4, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.4, opacity: 0 }}
+                          transition={{ duration: 0.45, ease: "easeOut" }}
+                          style={{
+                            position: "absolute", width: 44, height: 44,
+                            top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+                            borderRadius: "50%",
+                            border: "1.5px solid rgba(255,255,255,0.9)",
+                            boxShadow: "0 0 16px rgba(255,255,255,0.5), 0 0 32px rgba(255,255,255,0.2)",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
 
-                  {/* Description panel — slides in from the side */}
-                  <AnimatePresence>
-                    {isActive && (
-                      <motion.div
-                        initial={{ opacity: 0, x: panelOnLeft ? 14 : -14 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: panelOnLeft ? 14 : -14, transition: { duration: 0.22 } }}
-                        transition={{ duration: 0.42, ease: [0.25, 0.46, 0.45, 0.94] }}
-                        style={{
-                          position: "absolute",
-                          ...(panelOnLeft ? { right: "calc(50% + 40px)" } : { left: "calc(50% + 40px)" }),
-                          top: "50%", transform: "translateY(-50%)",
-                          width: 256,
-                          background: "rgba(6, 6, 6, 0.91)",
-                          backdropFilter: "blur(28px)",
-                          borderTop: "1px solid rgba(255,255,255,0.12)",
-                          borderBottom: "1px solid rgba(255,255,255,0.08)",
-                          ...(panelOnLeft
-                            ? { borderRight: "1px solid rgba(255,255,255,0.08)" }
-                            : { borderLeft: "1px solid rgba(255,255,255,0.08)" }),
-                          padding: "18px 20px 16px",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        {/* Small label */}
-                        <div className="font-montserrat text-white/40 text-[8px] tracking-[0.28em] uppercase mb-2">
-                          {spot.label}
-                        </div>
+                    {/* Marker dot */}
+                    <div
+                      data-testid="hotspot-dot"
+                      style={{
+                        position: "relative", width: 20, height: 20, borderRadius: "50%",
+                        background: panelVisible ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.18)",
+                        border: "1.5px solid rgba(255,255,255,0.85)",
+                        backdropFilter: "blur(4px)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer",
+                        boxShadow: panelVisible ? "0 0 20px rgba(255,255,255,0.7)" : "none",
+                        transform: panelVisible ? "scale(1.35)" : "scale(1)",
+                        transition: "transform 0.35s ease, background 0.35s ease, box-shadow 0.35s ease",
+                      }}
+                    >
+                      <div style={{
+                        width: 6, height: 6, borderRadius: "50%",
+                        background: panelVisible ? "rgba(0,0,0,0.75)" : "white",
+                        transition: "background 0.35s ease",
+                      }} />
+                    </div>
 
-                        {/* Title */}
-                        <div className="font-cinzel text-white font-semibold tracking-wide mb-3" style={{ fontSize: 13.5 }}>
-                          {spot.title}
-                        </div>
-
-                        {/* Thin divider draws in */}
+                    {/* Connector line — draws out from dot to panel edge */}
+                    <AnimatePresence>
+                      {panelVisible && (
                         <motion.div
                           initial={{ scaleX: 0 }}
                           animate={{ scaleX: 1 }}
-                          transition={{ duration: 0.5, delay: 0.18, ease: "easeOut" }}
-                          style={{ height: 1, backgroundColor: "rgba(255,255,255,0.13)", transformOrigin: "left", marginBottom: 12 }}
+                          exit={{ scaleX: 0, transition: { duration: 0.18 } }}
+                          transition={{ duration: 0.32, ease: "easeOut" }}
+                          style={{
+                            position: "absolute", top: "50%",
+                            ...(panelOnLeft ? { right: "50%", transformOrigin: "right" } : { left: "50%", transformOrigin: "left" }),
+                            width: 44, height: 1,
+                            backgroundColor: "rgba(255,255,255,0.5)",
+                            pointerEvents: "none",
+                          }}
                         />
+                      )}
+                    </AnimatePresence>
 
-                        {/* Description — word by word */}
-                        <div className="font-cormorant text-white/62 leading-relaxed" style={{ fontSize: 14.5 }}>
-                          {spot.desc.split(" ").map((word, wi) => (
-                            <motion.span
-                              key={wi}
-                              initial={{ opacity: 0, y: 6 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.32, delay: 0.22 + wi * 0.055, ease: "easeOut" }}
-                              style={{ display: "inline-block", marginRight: "0.28em" }}
-                            >
-                              {word}
-                            </motion.span>
-                          ))}
-                        </div>
-
-                        {/* Explore CTA */}
+                    {/* Info panel — slides in from the side */}
+                    <AnimatePresence>
+                      {panelVisible && (
                         <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.35, delay: 0.55 }}
-                          className="font-montserrat text-white/45 text-[8.5px] tracking-[0.22em] uppercase mt-4 flex items-center gap-1.5"
+                          key={activeSpot.title}
+                          initial={{ opacity: 0, x: panelOnLeft ? 16 : -16 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: panelOnLeft ? 16 : -16, transition: { duration: 0.2 } }}
+                          transition={{ duration: 0.44, ease: [0.25, 0.46, 0.45, 0.94] }}
+                          data-testid="hotspot-panel"
+                          style={{
+                            position: "absolute",
+                            ...(panelOnLeft ? { right: "calc(50% + 44px)" } : { left: "calc(50% + 44px)" }),
+                            top: "50%", transform: "translateY(-50%)",
+                            width: 272,
+                            background: "rgba(5, 5, 5, 0.92)",
+                            backdropFilter: "blur(32px)",
+                            borderTop: "1px solid rgba(255,255,255,0.13)",
+                            borderBottom: "1px solid rgba(255,255,255,0.07)",
+                            ...(panelOnLeft
+                              ? { borderRight: "1px solid rgba(255,255,255,0.07)" }
+                              : { borderLeft: "1px solid rgba(255,255,255,0.07)" }),
+                            padding: "20px 22px 18px",
+                            pointerEvents: "none",
+                          }}
                         >
-                          Explore <span style={{ fontSize: 10, letterSpacing: 0 }}>→</span>
+                          {/* Category label */}
+                          <div className="font-montserrat text-white/38 text-[7.5px] tracking-[0.32em] uppercase mb-1">
+                            {activeSpot.label}
+                          </div>
+
+                          {/* Location sub-label */}
+                          <div className="font-montserrat text-white/28 text-[7px] tracking-[0.18em] uppercase mb-3">
+                            {activeSpot.location}
+                          </div>
+
+                          {/* Title */}
+                          <div className="font-cinzel text-white font-semibold tracking-wide mb-3" style={{ fontSize: 14 }}>
+                            {activeSpot.title}
+                          </div>
+
+                          {/* Divider — draws in */}
+                          <motion.div
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.55, delay: 0.15, ease: "easeOut" }}
+                            style={{ height: 1, backgroundColor: "rgba(255,255,255,0.12)", transformOrigin: "left", marginBottom: 13 }}
+                          />
+
+                          {/* Description — word-by-word reveal */}
+                          <div className="font-cormorant text-white/60 leading-relaxed" style={{ fontSize: 14.5 }}>
+                            {activeSpot.desc.split(" ").map((word, wi) => (
+                              <motion.span
+                                key={wi}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: 0.2 + wi * 0.05, ease: "easeOut" }}
+                                style={{ display: "inline-block", marginRight: "0.28em" }}
+                              >
+                                {word}
+                              </motion.span>
+                            ))}
+                          </div>
+
+                          {/* Explore CTA */}
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.35, delay: 0.6 }}
+                            data-testid="hotspot-explore-cta"
+                            className="font-montserrat text-white/42 text-[8px] tracking-[0.24em] uppercase mt-4 flex items-center gap-1.5"
+                          >
+                            Explore <span style={{ fontSize: 10, letterSpacing: 0 }}>→</span>
+                          </motion.div>
                         </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </motion.div>
-        </AnimatePresence>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          );
+        })()}
 
 
         {/* Destination label — character-split reveal */}
