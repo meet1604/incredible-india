@@ -1,0 +1,169 @@
+Create a premium cinematic travel website hero banner inspired by the storytelling style of myswitzerland.com, but focused on India's most iconic destinations.
+
+The banner must feel cinematic, immersive, and smooth with high-end animations. The goal is to create a visually stunning travel introduction that immediately captures attention.
+
+MAIN HERO STRUCTURE
+
+Build a full-screen cinematic hero section with autoplay background video and smooth transitions between different locations.
+
+Locations included in the video sequence:
+Taj Mahal
+Udaipur
+Statue of Unity
+Kashmir
+Ladakh
+Lakshadweep
+
+VIDEO BEHAVIOR
+
+Use full-screen cinematic drone style videos.
+Video must autoplay, muted, looped, and smoothly transition between destinations.
+Use slow cinematic cuts or crossfade transitions between scenes.
+
+Example sequence:
+Taj Mahal sunrise aerial
+Lake Pichola Udaipur palace reflection
+Statue of Unity aerial
+Kashmir valley drone
+Ladakh mountain road
+Lakshadweep turquoise ocean drone
+
+Ensure video fills the entire screen using object-fit: cover.
+
+HERO TEXT OVERLAY
+
+Overlay elegant text centered on the video.
+
+Main heading:
+"Experience Incredible India"
+
+Subheading:
+"From royal palaces to Himalayan adventures"
+
+Add a CTA button:
+"Explore India"
+
+Text should appear with smooth fade + upward motion animation.
+
+ANIMATION REQUIREMENTS
+
+All animations must be extremely smooth and cinematic.
+
+Include:
+
+Smooth fade-in elements
+Text slide-up animation
+Parallax scroll effect
+Subtle zoom on background video
+Micro hover animation on buttons
+Soft gradient overlay on video
+Smooth scroll navigation
+Scroll-triggered animation for next sections
+
+Use requestAnimationFrame for smoothness.
+
+ANIMATION LIBRARIES
+
+Use modern frontend animation tools:
+
+GSAP
+ScrollTrigger
+IntersectionObserver
+CSS transform animations
+
+Add scroll-based reveal animations for elements.
+
+Example effects:
+opacity fade
+translateY
+scale animation
+parallax background motion
+
+DESIGN STYLE
+
+Design must feel like a luxury tourism brand.
+
+Use:
+
+Minimal UI
+Large typography
+Soft white text
+Subtle dark overlay on videos
+Elegant spacing
+High-end editorial layout
+
+Typography style:
+Modern luxury travel website style.
+
+SMOOTH SCROLL SYSTEM
+
+Implement smooth scrolling across the site.
+
+Use either:
+
+Lenis smooth scroll
+or
+custom requestAnimationFrame smooth scrolling.
+
+Ensure scroll performance is extremely smooth on both desktop and mobile.
+
+PERFORMANCE OPTIMIZATION
+
+Ensure the hero loads fast.
+
+Use:
+
+lazy loading videos
+video compression
+adaptive video resolution
+preload first video
+hardware acceleration for animations
+will-change: transform
+
+Make animations GPU accelerated.
+
+RESPONSIVE DESIGN
+
+Hero must work perfectly on:
+
+Desktop
+Tablet
+Mobile
+
+Adjust text size dynamically.
+
+VIDEO FALLBACK
+
+If video fails to load, automatically fallback to high-quality background images.
+
+CODE STRUCTURE
+
+Organize code cleanly.
+
+Files:
+
+index.html
+styles.css
+animations.js
+videos folder
+assets folder
+
+Make code readable and scalable.
+
+USER EXPERIENCE DETAILS
+
+Add subtle UI details:
+
+Button hover glow
+Smooth button press animation
+Scroll indicator animation
+Soft gradient overlay
+Slow cinematic video zoom
+
+Ensure entire experience feels smooth, immersive, and cinematic.
+
+FINAL RESULT
+
+The final banner should feel like a high-end travel documentary introduction to India.
+
+The animation, video transitions, and scroll effects must feel premium, smooth, and visually impressive.
