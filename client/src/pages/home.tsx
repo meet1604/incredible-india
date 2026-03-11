@@ -770,7 +770,7 @@ export default function Home() {
                 {[
                   { name: "Rajasthan",         label: "Desert Kingdom",          color: "#C9973A" },
                   { name: "Kerala",             label: "God's Own Country",        color: "#4ade80" },
-                  { name: "Jammu and Kashmir",  label: "Heaven on Earth",          color: "#a78bfa" },
+                  { name: "Jammu & Kashmir",    label: "Heaven on Earth",          color: "#a78bfa" },
                   { name: "Tamil Nadu",         label: "Land of Temples",          color: "#f87171" },
                   { name: "Goa",                label: "Pearl of the Orient",      color: "#60a5fa" },
                   { name: "Maharashtra",        label: "Gateway of India",         color: "#fb923c" },
