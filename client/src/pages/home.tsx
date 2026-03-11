@@ -387,26 +387,6 @@ export default function Home() {
                       </div>
                     ))}
 
-                    {/* ── Active glow ring (panel open) ── */}
-                    <AnimatePresence>
-                      {panelVisible && (
-                        <motion.div
-                          initial={{ scale: 0.5, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0.5, opacity: 0 }}
-                          transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                          style={{
-                            position: "absolute", width: 34, height: 34,
-                            top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-                            borderRadius: "50%",
-                            border: "1px solid rgba(255,255,255,0.9)",
-                            boxShadow: "0 0 0 3px rgba(255,255,255,0.08), 0 0 18px rgba(255,255,255,0.45), 0 0 40px rgba(255,255,255,0.15)",
-                            pointerEvents: "none",
-                          }}
-                        />
-                      )}
-                    </AnimatePresence>
-
                     {/* ── Crosshair tick marks (appear when active) ── */}
                     {[
                       { top: -10, left: "50%", w: 1, h: 6, tx: "-50%", ty: 0 },
