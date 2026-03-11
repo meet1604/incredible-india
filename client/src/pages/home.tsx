@@ -342,11 +342,8 @@ export default function Home() {
               </>
             );
           })()}
-        </div>
 
-
-
-        {/* ── Time-synced hotspot markers ── */}
+        {/* ── Time-synced hotspot markers — inside pan-layer so they track the video ── */}
         {(() => {
           const activeSpot = TIME_HOTSPOTS.find(h => videoTime >= h.timeStart && videoTime <= h.timeEnd) ?? null;
           const panelVisible = !!activeSpot && (videoTime >= activeSpot.timeStart + 1.5 || hoverActive);
@@ -366,7 +363,7 @@ export default function Home() {
                   <div
                     data-testid={`hotspot-${activeSpot.title.replace(/\s+/g, "-").toLowerCase()}`}
                     className="absolute"
-                    style={{ left: activeSpot.x, top: activeSpot.y, transform: "translate(-50%, -50%)", pointerEvents: "auto" }}
+                    style={{ left: activeSpot.x, top: activeSpot.y, transform: "translate(-50%, -50%) scale(0.6897)", transformOrigin: "center center", pointerEvents: "auto" }}
                     onMouseEnter={() => {
                       setHoverActive(true);
                       videoRefs.current[0]?.pause();
@@ -622,7 +619,7 @@ export default function Home() {
             </AnimatePresence>
           );
         })()}
-
+        </div>{/* ── /pan-layer ── */}
 
         {/* Destination label — character-split reveal */}
         <div className="absolute bottom-12 left-8 md:left-16 z-30">
