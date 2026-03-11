@@ -115,7 +115,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ── Mouse parallax ── direct event handler, CSS transition for smooth lerp
+  // ── Cinematic mouse pan — persistent RAF loop, no start/stop glitching
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return;
     if (!heroRef.current || !pxVideoBgRef.current) return;
@@ -123,51 +123,35 @@ export default function Home() {
     const hero = heroRef.current;
     const videoBg = pxVideoBgRef.current;
 
-    // Apply baseline scale so panning never exposes edges
     videoBg.style.willChange = "transform";
     videoBg.style.transformOrigin = "center center";
 
-    // Current (lerped) and target values
     let curX = 0, curY = 0;
     let tgtX = 0, tgtY = 0;
-    let rafId = 0;
-    let running = false;
+    let rafId: number;
 
-    const LERP = 0.06;   // lower = slower / more cinematic
-    const MAX  = 120;    // px — maximum pan distance
+    const LERP = 0.07;
+    const MAX  = 120;
 
+    // Loop always runs — no start/stop, no gaps between frames
     const tick = () => {
       curX += (tgtX - curX) * LERP;
       curY += (tgtY - curY) * LERP;
-      videoBg.style.transform = `translate3d(${curX.toFixed(3)}px, ${curY.toFixed(3)}px, 0) scale(1.25)`;
-
-      // Stop loop once settled at rest (within 0.05px of target)
-      if (Math.abs(tgtX - curX) < 0.05 && Math.abs(tgtY - curY) < 0.05 &&
-          Math.abs(tgtX) < 0.05 && Math.abs(tgtY) < 0.05) {
-        running = false;
-        return;
-      }
+      videoBg.style.transform =
+        `translate3d(${curX.toFixed(2)}px, ${curY.toFixed(2)}px, 0) scale(1.25)`;
       rafId = requestAnimationFrame(tick);
     };
 
-    const startLoop = () => {
-      if (!running) {
-        running = true;
-        rafId = requestAnimationFrame(tick);
-      }
-    };
+    rafId = requestAnimationFrame(tick);
 
     const onMouseMove = (e: MouseEvent) => {
-      // Negate so the video content follows the cursor (parallax pan in cursor direction)
       tgtX = -(e.clientX / window.innerWidth  - 0.5) * MAX * 2;
       tgtY = -(e.clientY / window.innerHeight - 0.5) * MAX * 2;
-      startLoop();
     };
 
     const onMouseLeave = () => {
       tgtX = 0;
       tgtY = 0;
-      startLoop();
     };
 
     hero.addEventListener("mousemove",  onMouseMove);
