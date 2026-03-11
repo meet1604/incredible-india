@@ -104,8 +104,7 @@ export default function Home() {
   const experiencesRef = useRef<HTMLDivElement>(null);
 
   // ── Mouse parallax refs (wrapper divs — never touched by GSAP)
-  const pxVideoBgRef  = useRef<HTMLDivElement>(null);
-  const pxGradientRef = useRef<HTMLDivElement>(null);
+  const pxVideoBgRef = useRef<HTMLDivElement>(null);
 
   const { scrollY } = useScroll();
   const parallaxY = useTransform(scrollY, [0, 800], [0, -160]);
@@ -135,12 +134,12 @@ export default function Home() {
     let running = false;
 
     const LERP = 0.06;   // lower = slower / more cinematic
-    const MAX  = 40;     // px
+    const MAX  = 120;    // px — maximum pan distance
 
     const tick = () => {
       curX += (tgtX - curX) * LERP;
       curY += (tgtY - curY) * LERP;
-      videoBg.style.transform = `translate3d(${curX.toFixed(3)}px, ${curY.toFixed(3)}px, 0) scale(1.1)`;
+      videoBg.style.transform = `translate3d(${curX.toFixed(3)}px, ${curY.toFixed(3)}px, 0) scale(1.25)`;
 
       // Stop loop once settled at rest (within 0.05px of target)
       if (Math.abs(tgtX - curX) < 0.05 && Math.abs(tgtY - curY) < 0.05 &&
@@ -159,8 +158,9 @@ export default function Home() {
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      tgtX = (e.clientX / window.innerWidth  - 0.5) * MAX * 2;
-      tgtY = (e.clientY / window.innerHeight - 0.5) * MAX * 2;
+      // Negate so the video content follows the cursor (parallax pan in cursor direction)
+      tgtX = -(e.clientX / window.innerWidth  - 0.5) * MAX * 2;
+      tgtY = -(e.clientY / window.innerHeight - 0.5) * MAX * 2;
       startLoop();
     };
 
@@ -384,19 +384,6 @@ export default function Home() {
           })}
         </div>
 
-        {/* Gradient overlays */}
-        <div ref={pxGradientRef} className="absolute inset-0 z-10" style={{
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.92) 100%)",
-          willChange: "transform",
-        }} />
-        <div className="absolute inset-0 z-10" style={{
-          background: "linear-gradient(to right, rgba(0,0,0,0.3) 0%, transparent 40%)"
-        }} />
-
-        {/* Vignette */}
-        <div className="absolute inset-0 z-10" style={{
-          background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)"
-        }} />
 
 
         {/* Slide dots */}
