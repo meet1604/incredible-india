@@ -40,19 +40,19 @@ const destinations = [
   },
 ];
 
-type Hotspot = { x: string; y: string; title: string; desc: string };
+type Hotspot = { x: string; y: string; label: string; title: string; desc: string };
 const HOTSPOTS: Record<string, Hotspot[]> = {
   "Taj Mahal": [
-    { x: "50%", y: "42%", title: "Taj Mahal", desc: "Built over 22 years by 22,000 artisans, Emperor Shah Jahan's declaration of eternal love rises 73 metres above the Yamuna river in pure white marble." },
-    { x: "50%", y: "66%", title: "Reflecting Pool", desc: "The long hauz-i-kausar pool creates the iconic mirror image of the dome — the symmetry that makes this monument unlike any other place on earth." },
+    { x: "50%", y: "42%", label: "UNESCO World Heritage", title: "Taj Mahal", desc: "Built over 22 years by 22,000 artisans, Emperor Shah Jahan's declaration of eternal love rises 73 metres above the Yamuna in pure white marble." },
+    { x: "50%", y: "66%", label: "Architectural Wonder", title: "Reflecting Pool", desc: "The long hauz-i-kausar pool creates the iconic mirror image of the dome — the symmetry that makes this monument unlike any other place on earth." },
   ],
   "Udaipur": [
-    { x: "37%", y: "38%", title: "City Palace", desc: "Four centuries of Mewar royalty shaped this vast lakeside complex — a maze of royal apartments, inlaid marble courtyards, and towered ramparts." },
-    { x: "63%", y: "56%", title: "Lake Pichola", desc: "Crafted by hand in 1362, this shimmering lake holds the Lake Palace afloat and earns Udaipur its reputation as the Venice of the East." },
+    { x: "37%", y: "38%", label: "Royal Heritage", title: "City Palace", desc: "Four centuries of Mewar royalty shaped this vast lakeside complex — a maze of royal apartments, inlaid marble courtyards, and towered ramparts." },
+    { x: "63%", y: "56%", label: "Natural Wonder", title: "Lake Pichola", desc: "Crafted by hand in 1362, this shimmering lake holds the Lake Palace afloat and earns Udaipur its name — the Venice of the East." },
   ],
   "Ladakh": [
-    { x: "44%", y: "46%", title: "Khardung La", desc: "At 5,359 metres, this legendary pass cuts through the Karakoram and links Leh to the silent Nubra Valley — a road that redefines the edge of the world." },
-    { x: "28%", y: "32%", title: "Karakoram Range", desc: "The second-highest range on Earth, home to K2 and the Baltoro Glacier. A wilderness where geography becomes something close to philosophy." },
+    { x: "44%", y: "46%", label: "World's Highest Pass", title: "Khardung La", desc: "At 5,359 metres, this legendary pass cuts through the Karakoram and links Leh to the silent Nubra Valley — a road that redefines the edge of the world." },
+    { x: "28%", y: "32%", label: "Karakoram Peaks", title: "Karakoram Range", desc: "The second-highest range on Earth, home to K2 and the Baltoro Glacier — a wilderness where geography becomes something close to philosophy." },
   ],
 };
 
@@ -498,32 +498,95 @@ export default function Home() {
                       transition: "background 0.35s ease",
                     }} />
                   </div>
-                  {/* Description panel */}
+                  {/* Connector line — draws from dot to panel */}
                   <AnimatePresence>
                     {isActive && (
                       <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        transition={{ duration: 0.35, ease: "easeOut" }}
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        exit={{ scaleX: 0, transition: { duration: 0.18 } }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
                         style={{
                           position: "absolute",
-                          ...(panelOnLeft ? { right: "calc(100% + 18px)" } : { left: "calc(100% + 18px)" }),
+                          top: "50%",
+                          ...(panelOnLeft
+                            ? { right: "50%", transformOrigin: "right" }
+                            : { left: "50%", transformOrigin: "left" }),
+                          width: 40,
+                          height: 1,
+                          backgroundColor: "rgba(255,255,255,0.55)",
+                          pointerEvents: "none",
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Description panel — slides in from the side */}
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        initial={{ opacity: 0, x: panelOnLeft ? 14 : -14 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: panelOnLeft ? 14 : -14, transition: { duration: 0.22 } }}
+                        transition={{ duration: 0.42, ease: [0.25, 0.46, 0.45, 0.94] }}
+                        style={{
+                          position: "absolute",
+                          ...(panelOnLeft ? { right: "calc(50% + 40px)" } : { left: "calc(50% + 40px)" }),
                           top: "50%", transform: "translateY(-50%)",
-                          width: 240,
-                          background: "rgba(4, 4, 4, 0.84)",
-                          backdropFilter: "blur(20px)",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                          padding: "18px 20px",
+                          width: 256,
+                          background: "rgba(6, 6, 6, 0.91)",
+                          backdropFilter: "blur(28px)",
+                          borderTop: "1px solid rgba(255,255,255,0.12)",
+                          borderBottom: "1px solid rgba(255,255,255,0.08)",
+                          ...(panelOnLeft
+                            ? { borderRight: "1px solid rgba(255,255,255,0.08)" }
+                            : { borderLeft: "1px solid rgba(255,255,255,0.08)" }),
+                          padding: "18px 20px 16px",
                           pointerEvents: "none",
                         }}
                       >
-                        <div className="font-cinzel text-white text-[11px] font-semibold tracking-[0.18em] uppercase mb-2.5">
+                        {/* Small label */}
+                        <div className="font-montserrat text-white/40 text-[8px] tracking-[0.28em] uppercase mb-2">
+                          {spot.label}
+                        </div>
+
+                        {/* Title */}
+                        <div className="font-cinzel text-white font-semibold tracking-wide mb-3" style={{ fontSize: 13.5 }}>
                           {spot.title}
                         </div>
-                        <div className="font-cormorant text-white/70 leading-relaxed" style={{ fontSize: 15 }}>
-                          {spot.desc}
+
+                        {/* Thin divider draws in */}
+                        <motion.div
+                          initial={{ scaleX: 0 }}
+                          animate={{ scaleX: 1 }}
+                          transition={{ duration: 0.5, delay: 0.18, ease: "easeOut" }}
+                          style={{ height: 1, backgroundColor: "rgba(255,255,255,0.13)", transformOrigin: "left", marginBottom: 12 }}
+                        />
+
+                        {/* Description — word by word */}
+                        <div className="font-cormorant text-white/62 leading-relaxed" style={{ fontSize: 14.5 }}>
+                          {spot.desc.split(" ").map((word, wi) => (
+                            <motion.span
+                              key={wi}
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.32, delay: 0.22 + wi * 0.055, ease: "easeOut" }}
+                              style={{ display: "inline-block", marginRight: "0.28em" }}
+                            >
+                              {word}
+                            </motion.span>
+                          ))}
                         </div>
+
+                        {/* Explore CTA */}
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.35, delay: 0.55 }}
+                          className="font-montserrat text-white/45 text-[8.5px] tracking-[0.22em] uppercase mt-4 flex items-center gap-1.5"
+                        >
+                          Explore <span style={{ fontSize: 10, letterSpacing: 0 }}>→</span>
+                        </motion.div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -549,40 +612,54 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Destination label — cinematic title animation */}
+        {/* Destination label — character-split reveal */}
         <div className="absolute bottom-12 left-8 md:left-16 z-30">
           <AnimatePresence mode="wait">
-            <motion.div key={currentSlide} className="flex flex-col gap-3">
-
-              {/* Category eyebrow */}
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.22, ease: "easeIn" } }}
+              className="flex flex-col gap-3"
+            >
+              {/* Category eyebrow — fades in */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
                 className="font-montserrat text-white/50 text-[10px] tracking-[0.3em] uppercase"
               >
                 {destinations[currentSlide]?.category}
               </motion.div>
 
-              {/* Main title */}
-              <motion.h2
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="font-cinzel text-white"
-                style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)", fontWeight: 600, letterSpacing: "2px", lineHeight: 1.05 }}
-              >
-                {destinations[currentSlide]?.name}
-              </motion.h2>
+              {/* Main title — every character slides up through a mask */}
+              <div style={{ overflow: "hidden", lineHeight: 1.08 }}>
+                <h2
+                  className="font-cinzel text-white"
+                  style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)", fontWeight: 600, letterSpacing: "2px", lineHeight: 1.08 }}
+                >
+                  {destinations[currentSlide]?.name.split("").map((char, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ y: "110%" }}
+                      animate={{ y: "0%" }}
+                      transition={{
+                        duration: 0.55,
+                        delay: 0.08 + i * 0.045,
+                        ease: [0.25, 0.46, 0.45, 0.94],
+                      }}
+                      style={{ display: "inline-block" }}
+                    >
+                      {char === " " ? "\u00A0" : char}
+                    </motion.span>
+                  ))}
+                </h2>
+              </div>
 
               {/* Animated underline */}
               <motion.div
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
-                exit={{ scaleX: 0 }}
-                transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
                 style={{ transformOrigin: "left", height: "1px", backgroundColor: "white", width: "100%" }}
               />
 
