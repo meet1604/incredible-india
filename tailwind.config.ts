@@ -86,6 +86,10 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
+        cinzel: ["Cinzel", "serif"],
+        cormorant: ["Cormorant Garamond", "serif"],
+        inter: ["Inter", "sans-serif"],
+        montserrat: ["Montserrat", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
