@@ -24,24 +24,19 @@ export function HotspotMarker({ hotspot, onHoverChange }: HotspotMarkerProps) {
       onMouseLeave={() => { setIsHovered(false); onHoverChange(false); }}
     >
       {/* Dot + rings */}
-      <div className="relative flex items-center justify-center cursor-pointer">
-        {/* Outer slow pulse */}
-        <motion.div
-          className="absolute rounded-full border border-amber-400/30"
-          animate={{ width: isHovered ? 44 : 36, height: isHovered ? 44 : 36, opacity: [0.3, 0, 0.3] }}
-          transition={{ opacity: { repeat: Infinity, duration: 2 }, width: { duration: 0.3 }, height: { duration: 0.3 } }}
-        />
-        {/* Inner ring */}
-        <motion.div
-          className="absolute rounded-full border border-amber-400/50"
-          animate={{ width: isHovered ? 26 : 20, height: isHovered ? 26 : 20 }}
-          transition={{ duration: 0.3 }}
+      <div className="relative flex items-center justify-center cursor-pointer w-8 h-8">
+        {/* Ripple ring 1 */}
+        <span className="absolute inline-flex w-8 h-8 rounded-full bg-amber-400/20 animate-ping" />
+        {/* Ripple ring 2 — delayed */}
+        <span
+          className="absolute inline-flex w-5 h-5 rounded-full bg-amber-400/25 animate-ping"
+          style={{ animationDelay: "0.6s" }}
         />
         {/* Core dot */}
-        <motion.div
-          className="relative w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.9)]"
-          animate={{ scale: isHovered ? 1.3 : 1 }}
-          transition={{ duration: 0.25 }}
+        <motion.span
+          className="relative inline-flex w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_10px_3px_rgba(251,191,36,0.6)]"
+          animate={{ scale: isHovered ? 1.4 : 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
         />
       </div>
 
