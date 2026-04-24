@@ -1,60 +1,182 @@
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { X, ChevronDown } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { X, MapPin, Clock, ChevronDown, Utensils, Landmark, BookOpen, Camera } from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
+// ── Data ─────────────────────────────────────────────────────────────────────
 
-const KERALA_CARDS = [
+const PLACES = [
   {
-    id: 1,
-    title: "Kerala Backwaters",
-    sub: "God's own waterways",
-    img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=700&q=85&auto=format&fit=crop",
-    w: 260, h: 340,
+    title: "Alleppey Backwaters",
+    tag: "Waterways",
+    desc: "Glide through 900 km of interlocked canals on a traditional houseboat as the paddy fields and coconut groves drift past.",
+    img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=85&auto=format&fit=crop",
+    hours: "Year-round · Best Oct–Feb",
   },
   {
-    id: 2,
-    title: "Kathakali Dance",
-    sub: "Ancient classical art form",
-    img: "https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?w=700&q=85&auto=format&fit=crop",
-    w: 240, h: 300,
-  },
-  {
-    id: 3,
-    title: "Kerala Cuisine",
-    sub: "Spices of the Malabar coast",
-    img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=700&q=85&auto=format&fit=crop",
-    w: 240, h: 300,
-  },
-  {
-    id: 4,
     title: "Munnar Tea Gardens",
-    sub: "Emerald hills of the Western Ghats",
-    img: "https://images.unsplash.com/photo-1582716401301-b2407dc7563d?w=700&q=85&auto=format&fit=crop",
-    w: 270, h: 360,
+    tag: "Hill Station",
+    desc: "Rolling emerald terraces at 1,600 m above sea level — the air is cool, fragrant, and impossibly green.",
+    img: "https://images.unsplash.com/photo-1582716401301-b2407dc7563d?w=800&q=85&auto=format&fit=crop",
+    hours: "Sep–May · Sunrise views",
   },
   {
-    id: 5,
-    title: "Kovalam Beaches",
-    sub: "Crescent of golden sand",
-    img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=700&q=85&auto=format&fit=crop",
-    w: 280, h: 340,
+    title: "Fort Kochi",
+    tag: "Heritage Town",
+    desc: "Colonial streets where Portuguese, Dutch, and British chapters meet Kerala's own story — Chinese fishing nets at dusk are iconic.",
+    img: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=800&q=85&auto=format&fit=crop",
+    hours: "Year-round · Evenings ideal",
   },
   {
-    id: 6,
-    title: "Kerala Temples",
-    sub: "Five thousand years of faith",
-    img: "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=700&q=85&auto=format&fit=crop",
-    w: 230, h: 290,
+    title: "Kovalam Beach",
+    tag: "Coastline",
+    desc: "Three crescent beaches separated by rocky headlands, famous for their lighthouse views and Ayurvedic retreat centres.",
+    img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=85&auto=format&fit=crop",
+    hours: "Nov–Mar · Golden season",
+  },
+  {
+    title: "Periyar Wildlife Sanctuary",
+    tag: "Wildlife",
+    desc: "Spot wild elephants, tigers, and Malabar giant squirrels around the pristine waters of Periyar Lake.",
+    img: "https://images.unsplash.com/photo-1549366021-9f761d450615?w=800&q=85&auto=format&fit=crop",
+    hours: "Oct–Jun · Morning safaris",
+  },
+  {
+    title: "Wayanad Forests",
+    tag: "Wilderness",
+    desc: "Ancient tribal heritage and misty jungle trails converge in one of India's most biodiverse districts.",
+    img: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=85&auto=format&fit=crop",
+    hours: "Jun–Sep · Monsoon magic",
   },
 ];
 
-const PAIRS = [
-  [KERALA_CARDS[0], KERALA_CARDS[1]],
-  [KERALA_CARDS[2], KERALA_CARDS[3]],
-  [KERALA_CARDS[4], KERALA_CARDS[5]],
+const CULTURE = [
+  {
+    title: "Kathakali",
+    desc: "A 500-year-old classical dance-drama where elaborate face paint and towering costumes tell tales from the Ramayana and Mahabharata. Each expression is a language.",
+    img: "https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?w=800&q=85&auto=format&fit=crop",
+    tag: "Classical Dance",
+  },
+  {
+    title: "Theyyam",
+    desc: "A sacred ritual art form practiced in North Kerala where performers become living deities. Drumbeats, fire, and elaborate headdresses create a trance-like spectacle.",
+    img: "https://images.unsplash.com/photo-1599930113854-d6d7fd521f10?w=800&q=85&auto=format&fit=crop",
+    tag: "Ritual Art",
+  },
+  {
+    title: "Onam Festival",
+    desc: "Kerala's grandest harvest festival — ten days of floral carpets (pookalam), snake boat races, tiger dances, and a 26-dish feast on a banana leaf.",
+    img: "https://images.unsplash.com/photo-1563911302283-d2bc129e7570?w=800&q=85&auto=format&fit=crop",
+    tag: "Harvest Festival",
+  },
+  {
+    title: "Nehru Trophy Boat Race",
+    desc: "Hundreds of oarsmen race 100-foot snake boats on Punnamada Lake to the thunder of vanchipattu — the boatman's song. A spectacle unlike any other.",
+    img: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=85&auto=format&fit=crop",
+    tag: "Water Sport",
+  },
 ];
+
+const FOOD = [
+  {
+    name: "Sadya",
+    desc: "A ceremonial feast of 28+ vegetarian dishes served on a fresh banana leaf — the ultimate expression of Kerala's hospitality.",
+    img: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&q=85&auto=format&fit=crop",
+    type: "Festive Meal",
+  },
+  {
+    name: "Kerala Fish Curry",
+    desc: "Kodampuli-soured, coconut-enriched, and fire-red with Kashmiri chillies. The soul of the Malabar coast in every spoonful.",
+    img: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600&q=85&auto=format&fit=crop",
+    type: "Seafood",
+  },
+  {
+    name: "Puttu & Kadala Curry",
+    desc: "Steamed rice cylinders with black chickpea curry — a humble, beloved breakfast that has fed Kerala for centuries.",
+    img: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&q=85&auto=format&fit=crop",
+    type: "Breakfast",
+  },
+  {
+    name: "Payasam",
+    desc: "Golden, cardamom-kissed rice pudding made with jaggery and coconut milk — served at every celebration as a blessing.",
+    img: "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&q=85&auto=format&fit=crop",
+    type: "Dessert",
+  },
+  {
+    name: "Appam & Stew",
+    desc: "Lacy, fermented rice crepes with a tender coconut milk stew of vegetables or chicken — a colonial-influenced classic.",
+    img: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=600&q=85&auto=format&fit=crop",
+    type: "Main Course",
+  },
+  {
+    name: "Malabar Biryani",
+    desc: "Fragrant, saffron-laced rice layered with spiced meat — Malabar's answer to Mughal grandeur, cooked in the dum style.",
+    img: "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=600&q=85&auto=format&fit=crop",
+    type: "Rice Dish",
+  },
+];
+
+const HISTORY = [
+  {
+    era: "3000 BCE",
+    title: "Spice Trade Begins",
+    desc: "Kerala's black pepper and cardamom attract Arab, Chinese, and Phoenician traders. Malabar ports become the richest in the ancient world.",
+  },
+  {
+    era: "1498 CE",
+    title: "Vasco da Gama Arrives",
+    desc: "The Portuguese navigator lands at Kozhikode (Calicut), opening the sea route from Europe to India and transforming global trade forever.",
+  },
+  {
+    era: "1600s",
+    title: "Dutch & British Era",
+    desc: "The Dutch displace the Portuguese, then the British East India Company gains control, reshaping Kerala's political and economic landscape.",
+  },
+  {
+    era: "1936",
+    title: "Temple Entry Proclamation",
+    desc: "Travancore's historic proclamation opens Hindu temples to all castes — a landmark moment in India's social reform movement.",
+  },
+  {
+    era: "1956",
+    title: "State of Kerala Formed",
+    desc: "Malayalam-speaking regions are unified into the state of Kerala on 1 November 1956, celebrated today as Kerala Piravi.",
+  },
+  {
+    era: "Today",
+    title: "God's Own Country",
+    desc: "With near-100% literacy, world-class healthcare, and one of India's highest Human Development Indexes, Kerala charts its own extraordinary path.",
+  },
+];
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+function FadeIn({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial={{ opacity: 0, y: 32 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
+  return (
+    <FadeIn className="text-center mb-16">
+      <p className="font-montserrat text-[10px] tracking-[0.45em] uppercase text-amber-400/80 mb-4">{eyebrow}</p>
+      <h2 className="font-cinzel text-4xl md:text-5xl font-bold text-white mb-5">{title}</h2>
+      {subtitle && <p className="font-inter text-white/45 text-sm max-w-xl mx-auto leading-relaxed">{subtitle}</p>}
+    </FadeIn>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 
 interface Props {
   isOpen: boolean;
@@ -63,340 +185,257 @@ interface Props {
 
 export default function KeralaOverlay({ isOpen, onClose }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const scrollSectionRef = useRef<HTMLDivElement>(null);
-
-  const pairWrapRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const leftCardRefs  = useRef<(HTMLDivElement | null)[]>([]);
-  const rightCardRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
-  const stRef = useRef<ScrollTrigger | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
-
-    const overlay = overlayRef.current;
-    if (!overlay) return;
-
-    overlay.scrollTop = 0;
     document.body.style.overflow = "hidden";
-
-    gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" });
-
-    const pw = pairWrapRefs.current;
-    const lc = leftCardRefs.current;
-    const rc = rightCardRefs.current;
-
-    gsap.set(pw, { y: "70vh", opacity: 0 });
-    gsap.set(lc, { x: 0 });
-    gsap.set(rc, { x: 0 });
-
-    ScrollTrigger.scrollerProxy(overlay, {
-      scrollTop(value?: number) {
-        if (arguments.length) overlay.scrollTop = value as number;
-        return overlay.scrollTop;
-      },
-      getBoundingClientRect() {
-        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
-      },
-    });
-
-    const onScroll = () => ScrollTrigger.update();
-    overlay.addEventListener("scroll", onScroll, { passive: true });
-
-    const tl = gsap.timeline({ paused: true });
-    tlRef.current = tl;
-
-    const addPair = (i: number, position: string | number) => {
-      const wrap = pw[i], left = lc[i], right = rc[i];
-      if (!wrap || !left || !right) return;
-
-      tl.to(wrap, { y: "5vh", opacity: 1, duration: 1, ease: "power2.out" }, position);
-      tl.to(left,  { x: "-35vw", y: "-10vh", duration: 1.5, ease: "power2.inOut" }, ">");
-      tl.to(right, { x:  "35vw", y: "-10vh", duration: 1.5, ease: "power2.inOut" }, "<");
-      tl.to(wrap,  { y: "-85vh", opacity: 0, duration: 1, ease: "power2.in" }, ">");
-    };
-
-    addPair(0, 0);
-    addPair(1, "+=0.3");
-    addPair(2, "+=0.3");
-
-    const st = ScrollTrigger.create({
-      trigger: scrollSectionRef.current,
-      scroller: overlay,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 1.5,
-      onUpdate: (self) => {
-        tl.progress(self.progress);
-      },
-    });
-    stRef.current = st;
-
-    return () => {
-      overlay.removeEventListener("scroll", onScroll);
-      st.kill();
-      tl.kill();
-      ScrollTrigger.getAll().forEach((s) => s.kill());
-      document.body.style.overflow = "";
-    };
+    if (overlayRef.current) overlayRef.current.scrollTop = 0;
+    return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
-
-  const handleClose = () => {
-    const overlay = overlayRef.current;
-    if (overlay) {
-      gsap.to(overlay, {
-        opacity: 0,
-        duration: 0.35,
-        ease: "power2.in",
-        onComplete: onClose,
-      });
-    } else {
-      onClose();
-    }
-  };
 
   if (!isOpen) return null;
 
   return (
     <div
       ref={overlayRef}
-      data-testid="kerala-overlay"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        overflowY: "auto",
-        background: "#050505",
-        opacity: 0,
-      }}
+      className="fixed inset-0 z-[200] overflow-y-auto bg-[#060608] text-white"
+      style={{ scrollBehavior: "smooth" }}
     >
-      {/* ── Close button (always on top) ── */}
+      {/* Close */}
       <button
-        onClick={handleClose}
-        data-testid="kerala-close"
-        style={{
-          position: "fixed",
-          top: 24,
-          right: 24,
-          zIndex: 210,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 44,
-          height: 44,
-          borderRadius: "50%",
-          background: "rgba(255,255,255,0.08)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          cursor: "pointer",
-          color: "white",
-          transition: "background 0.2s ease",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.18)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+        onClick={onClose}
+        className="fixed top-6 right-6 z-[210] w-11 h-11 rounded-full bg-white/8 backdrop-blur-xl border border-white/15 flex items-center justify-center text-white hover:bg-white/15 transition-colors"
       >
         <X size={18} />
       </button>
 
-      {/* ── Hero: 100vh ── */}
-      <div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
+      {/* ── HERO ──────────────────────────────────────────────────── */}
+      <section className="relative h-screen overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1920&q=85&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=1920&q=90&auto=format&fit=crop"
           alt="Kerala"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          className="absolute inset-0 w-full h-full object-cover scale-105"
         />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(5,5,5,0.7) 100%)" }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#060608]" />
 
-        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 24px" }}>
-          <div
-            className="font-montserrat uppercase text-white/50"
-            style={{ fontSize: 10, letterSpacing: "0.45em", marginBottom: 20 }}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="font-montserrat text-[10px] tracking-[0.5em] uppercase text-amber-400/90 mb-6"
           >
             God's Own Country
-          </div>
-
-          <h1
-            className="font-cinzel text-white font-bold"
-            style={{ fontSize: "clamp(3rem, 8vw, 7rem)", letterSpacing: "0.04em", lineHeight: 1.05, marginBottom: 24 }}
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="font-cinzel font-bold text-white leading-none mb-6"
+            style={{ fontSize: "clamp(4rem, 10vw, 8rem)", letterSpacing: "0.04em" }}
           >
-            Explore Kerala
-          </h1>
-
-          <div
-            style={{ width: 60, height: 1, background: "linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent)", marginBottom: 28 }}
+            Kerala
+          </motion.h1>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="w-16 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent mb-6"
           />
-
-          <p
-            className="font-cormorant text-white/70 italic"
-            style={{ fontSize: "clamp(1.1rem, 2.5vw, 1.5rem)", maxWidth: 560, lineHeight: 1.6 }}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.75, duration: 0.9 }}
+            className="font-inter text-white/60 text-base md:text-lg max-w-2xl leading-relaxed italic"
           >
-            Where emerald backwaters meet ancient temples, and spice-scented hills descend to crescent beaches of gold.
-          </p>
+            Where emerald backwaters meet ancient temples, spice-scented hills descend to golden beaches, and every sunrise feels like a painting.
+          </motion.p>
         </div>
 
-        {/* Scroll cue */}
-        <div style={{ position: "absolute", bottom: 36, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-          <span className="font-montserrat text-white/30" style={{ fontSize: 9, letterSpacing: "0.3em", textTransform: "uppercase" }}>Scroll to explore</span>
-          <ChevronDown size={16} color="rgba(255,255,255,0.3)" style={{ animation: "bounce 2s ease-in-out infinite" }} />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+          <span className="font-montserrat text-white/30 text-[9px] tracking-[0.35em] uppercase">Scroll to explore</span>
+          <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.8 }}>
+            <ChevronDown size={16} className="text-white/30" />
+          </motion.div>
         </div>
-      </div>
+      </section>
 
-      {/* ── Scroll animation section: 400vh ── */}
-      <div
-        ref={scrollSectionRef}
-        style={{ position: "relative", height: "400vh", background: "#050505" }}
-      >
-        {/* Sticky stage — CSS sticky, not GSAP pin */}
-        <div
-          style={{
-            position: "sticky",
-            top: 0,
-            height: "100vh",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {/* Section label */}
-          <div style={{ position: "absolute", top: 36, left: "50%", transform: "translateX(-50%)", textAlign: "center" }}>
-            <span className="font-montserrat text-white/20" style={{ fontSize: 9, letterSpacing: "0.4em", textTransform: "uppercase" }}>
-              Discover Kerala
-            </span>
-          </div>
+      {/* ── QUICK STATS ───────────────────────────────────────────── */}
+      <section className="py-16 border-y border-white/5 bg-white/[0.02]">
+        <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { n: "38,852", label: "km² Area" },
+            { n: "33M+", label: "Population" },
+            { n: "590 km", label: "Coastline" },
+            { n: "~100%", label: "Literacy Rate" },
+          ].map((s, i) => (
+            <FadeIn key={i} delay={i * 0.08}>
+              <div className="font-cinzel text-3xl font-bold text-white mb-1">{s.n}</div>
+              <div className="font-montserrat text-white/35 text-[10px] tracking-[0.25em] uppercase">{s.label}</div>
+            </FadeIn>
+          ))}
+        </div>
+      </section>
 
-          {/* Card pairs — all stacked at center, animated via GSAP */}
-          {PAIRS.map((pair, pi) => {
-            const [cardL, cardR] = pair;
-            const totalW = cardL.w + 8 + cardR.w;
-
-            return (
-              <div
-                key={pi}
-                ref={(el) => { pairWrapRefs.current[pi] = el; }}
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  top: "50%",
-                  marginLeft: -(totalW / 2),
-                  marginTop: -(Math.max(cardL.h, cardR.h) / 2),
-                  display: "flex",
-                  gap: 8,
-                  alignItems: "flex-start",
-                }}
-              >
-                {/* Left card */}
-                <div
-                  ref={(el) => { leftCardRefs.current[pi] = el; }}
-                  data-testid={`kerala-card-left-${pi}`}
-                  style={{
-                    width: cardL.w,
-                    height: cardL.h,
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    boxShadow: "0 24px 60px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5)",
-                    position: "relative",
-                    flexShrink: 0,
-                  }}
-                >
+      {/* ── TOURIST PLACES ────────────────────────────────────────── */}
+      <section className="py-28 px-6 max-w-7xl mx-auto">
+        <SectionHeader
+          eyebrow="Destinations"
+          title="Places to Visit"
+          subtitle="From mist-covered highlands to languid backwaters — every corner of Kerala holds a different world."
+        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {PLACES.map((p, i) => (
+            <FadeIn key={p.title} delay={i * 0.07}>
+              <div className="group relative rounded-xl overflow-hidden bg-white/[0.03] border border-white/8 hover:border-amber-400/30 transition-all duration-500 cursor-pointer">
+                <div className="relative h-56 overflow-hidden">
                   <img
-                    src={cardL.img}
-                    alt={cardL.title}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    src={p.img}
+                    alt={p.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%)" }} />
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "18px 16px" }}>
-                    <div className="font-cinzel text-white font-semibold" style={{ fontSize: 13, letterSpacing: "0.05em", marginBottom: 4 }}>
-                      {cardL.title}
-                    </div>
-                    <div className="font-montserrat text-white/55 uppercase" style={{ fontSize: 8, letterSpacing: "0.2em" }}>
-                      {cardL.sub}
-                    </div>
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <span className="absolute top-3 left-3 font-montserrat text-[9px] tracking-[0.3em] uppercase text-amber-400 bg-black/50 backdrop-blur-sm border border-amber-400/20 px-2.5 py-1 rounded-full">
+                    {p.tag}
+                  </span>
                 </div>
-
-                {/* Right card */}
-                <div
-                  ref={(el) => { rightCardRefs.current[pi] = el; }}
-                  data-testid={`kerala-card-right-${pi}`}
-                  style={{
-                    width: cardR.w,
-                    height: cardR.h,
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    boxShadow: "0 24px 60px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.5)",
-                    position: "relative",
-                    flexShrink: 0,
-                    marginTop: 32,
-                  }}
-                >
-                  <img
-                    src={cardR.img}
-                    alt={cardR.title}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%)" }} />
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "18px 16px" }}>
-                    <div className="font-cinzel text-white font-semibold" style={{ fontSize: 13, letterSpacing: "0.05em", marginBottom: 4 }}>
-                      {cardR.title}
-                    </div>
-                    <div className="font-montserrat text-white/55 uppercase" style={{ fontSize: 8, letterSpacing: "0.2em" }}>
-                      {cardR.sub}
-                    </div>
+                <div className="p-5">
+                  <h3 className="font-cinzel text-white font-semibold text-base mb-2">{p.title}</h3>
+                  <p className="font-inter text-white/50 text-[13px] leading-relaxed mb-3">{p.desc}</p>
+                  <div className="flex items-center gap-1.5 text-white/30">
+                    <Clock className="w-3 h-3" />
+                    <span className="font-montserrat text-[9px] tracking-widest uppercase">{p.hours}</span>
                   </div>
                 </div>
               </div>
-            );
-          })}
+            </FadeIn>
+          ))}
         </div>
-      </div>
+      </section>
 
-      {/* ── Footer CTA ── */}
-      <div
-        style={{
-          height: "50vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#050505",
-          gap: 20,
-        }}
-      >
-        <div className="font-montserrat text-white/30 uppercase" style={{ fontSize: 9, letterSpacing: "0.4em" }}>
-          Begin Your Journey
+      {/* ── CULTURE ───────────────────────────────────────────────── */}
+      <section className="py-28 bg-white/[0.015] border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <SectionHeader
+            eyebrow="Culture"
+            title="Living Traditions"
+            subtitle="Kerala's culture is not preserved in museums — it breathes, performs, and celebrates on every street and stage."
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {CULTURE.map((c, i) => (
+              <FadeIn key={c.title} delay={i * 0.1}>
+                <div className="group flex gap-5 rounded-xl bg-white/[0.03] border border-white/8 hover:border-white/15 p-5 transition-all duration-400">
+                  <div className="relative w-32 h-32 rounded-lg overflow-hidden shrink-0">
+                    <img
+                      src={c.img}
+                      alt={c.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex flex-col justify-center min-w-0">
+                    <span className="font-montserrat text-[9px] text-amber-400/80 tracking-[0.3em] uppercase mb-2">{c.tag}</span>
+                    <h3 className="font-cinzel text-white font-semibold text-base mb-2">{c.title}</h3>
+                    <p className="font-inter text-white/50 text-[12px] leading-relaxed">{c.desc}</p>
+                  </div>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
         </div>
-        <h3 className="font-cinzel text-white font-bold text-center" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)", letterSpacing: "0.04em" }}>
-          Kerala Awaits
-        </h3>
-        <button
-          onClick={handleClose}
-          className="font-montserrat uppercase"
-          style={{
-            marginTop: 12,
-            padding: "14px 36px",
-            background: "transparent",
-            border: "1px solid rgba(255,255,255,0.3)",
-            borderRadius: 2,
-            color: "rgba(255,255,255,0.8)",
-            fontSize: 10,
-            letterSpacing: "0.3em",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-            e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
-          }}
-        >
-          Return to Map
-        </button>
-      </div>
+      </section>
+
+      {/* ── FOOD ──────────────────────────────────────────────────── */}
+      <section className="py-28 px-6 max-w-7xl mx-auto">
+        <SectionHeader
+          eyebrow="Cuisine"
+          title="Flavours of Kerala"
+          subtitle="Coconut, spice, and the sea — Kerala's food is a feast of contrasts, rooted in ancient Ayurvedic wisdom."
+        />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {FOOD.map((f, i) => (
+            <FadeIn key={f.name} delay={i * 0.06}>
+              <div className="group relative rounded-xl overflow-hidden aspect-[4/3] cursor-pointer">
+                <img
+                  src={f.img}
+                  alt={f.name}
+                  className="w-full h-full object-cover transition-transform duration-600 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                <div className="absolute inset-0 p-4 flex flex-col justify-end">
+                  <span className="font-montserrat text-[8px] tracking-[0.3em] uppercase text-amber-400/80 mb-1">{f.type}</span>
+                  <h4 className="font-cinzel text-white font-semibold text-sm mb-1">{f.name}</h4>
+                  <p className="font-inter text-white/55 text-[11px] leading-snug opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-h-0 group-hover:max-h-20 overflow-hidden">
+                    {f.desc}
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HISTORY TIMELINE ──────────────────────────────────────── */}
+      <section className="py-28 bg-white/[0.015] border-y border-white/5">
+        <div className="max-w-4xl mx-auto px-6">
+          <SectionHeader
+            eyebrow="History"
+            title="Centuries of Stories"
+            subtitle="From ancient spice routes to a model modern state — Kerala's history is a tapestry of trade, faith, and reform."
+          />
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-amber-400/40 via-amber-400/20 to-transparent md:left-1/2 md:-translate-x-px" />
+
+            <div className="flex flex-col gap-10">
+              {HISTORY.map((h, i) => (
+                <FadeIn key={h.era} delay={i * 0.08}>
+                  <div className={`relative flex gap-6 md:gap-0 ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}>
+                    {/* Content */}
+                    <div className={`md:w-[calc(50%-2rem)] pl-10 md:pl-0 ${i % 2 === 0 ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
+                      <span className="font-montserrat text-[9px] tracking-[0.4em] uppercase text-amber-400/70 mb-1 block">{h.era}</span>
+                      <h4 className="font-cinzel text-white font-semibold text-base mb-2">{h.title}</h4>
+                      <p className="font-inter text-white/45 text-[13px] leading-relaxed">{h.desc}</p>
+                    </div>
+
+                    {/* Timeline dot */}
+                    <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 top-1 w-3.5 h-3.5 rounded-full bg-amber-400/80 border-2 border-[#060608] shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+
+                    {/* Spacer for opposite side on desktop */}
+                    <div className="hidden md:block md:w-[calc(50%-2rem)]" />
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER CTA ────────────────────────────────────────────── */}
+      <section className="relative py-36 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80&auto=format&fit=crop"
+            alt="Kerala beach"
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#060608] via-transparent to-[#060608]" />
+        </div>
+        <div className="relative z-10">
+          <FadeIn>
+            <p className="font-montserrat text-[10px] tracking-[0.45em] uppercase text-amber-400/80 mb-5">Begin Your Journey</p>
+            <h2 className="font-cinzel text-4xl md:text-6xl font-bold text-white mb-6">Kerala Awaits</h2>
+            <p className="font-inter text-white/45 max-w-md mx-auto text-sm leading-relaxed mb-10">
+              No description does it justice. The backwaters, the spices, the silence of the hills — you have to feel it yourself.
+            </p>
+            <button
+              onClick={onClose}
+              className="font-montserrat text-[10px] tracking-[0.3em] uppercase px-10 py-4 border border-white/25 text-white/80 hover:bg-white/8 hover:border-white/50 transition-all duration-300 rounded-sm"
+            >
+              Return to India
+            </button>
+          </FadeIn>
+        </div>
+      </section>
     </div>
   );
 }
