@@ -9,6 +9,7 @@ import IndiaMap, { IndiaMapHandle } from "@/components/IndiaMap";
 import { Hero } from "@/components/Hero";
 import { type SiteSettings, type Hotspot } from "@shared/schema";
 import { AdminPanel } from "@/components/AdminPanel";
+import KeralaOverlay from "@/components/KeralaOverlay";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,6 +24,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [keralaOpen, setKeralaOpen] = useState(false);
   const indiaMapRef = useRef<IndiaMapHandle>(null);
   const statsRef = useRef<HTMLDivElement>(null);
 
@@ -126,7 +128,7 @@ export default function Home() {
           </div>
           <div className="flex justify-center">
             <div className="relative w-full max-w-3xl h-[500px] md:h-[700px]">
-              <IndiaMap ref={indiaMapRef} onKeralaClick={() => {}} />
+              <IndiaMap ref={indiaMapRef} onKeralaClick={() => setKeralaOpen(true)} />
             </div>
           </div>
         </div>
@@ -134,6 +136,9 @@ export default function Home() {
 
       {/* Admin Panel */}
       <AdminPanel open={adminOpen} onOpenChange={setAdminOpen} />
+
+      {/* Kerala Page */}
+      <KeralaOverlay isOpen={keralaOpen} onClose={() => setKeralaOpen(false)} />
     </main>
   );
 }
