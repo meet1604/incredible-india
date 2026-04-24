@@ -138,7 +138,13 @@ export default function Home() {
       <AdminPanel open={adminOpen} onOpenChange={setAdminOpen} />
 
       {/* Kerala Page */}
-      <KeralaOverlay isOpen={keralaOpen} onClose={() => setKeralaOpen(false)} />
+      <KeralaOverlay
+        isOpen={keralaOpen}
+        onClose={() => {
+          setKeralaOpen(false);
+          setTimeout(() => indiaMapRef.current?.resetZoom(), 100);
+        }}
+      />
     </main>
   );
 }

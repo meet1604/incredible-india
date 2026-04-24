@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { X, MapPin, Clock, ChevronDown, Utensils, Landmark, BookOpen, Camera } from "lucide-react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { X, MapPin, Clock, ChevronDown } from "lucide-react";
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -193,11 +193,15 @@ export default function KeralaOverlay({ isOpen, onClose }: Props) {
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   return (
-    <div
+    <AnimatePresence>
+    {isOpen && (
+    <motion.div
       ref={overlayRef}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
       className="fixed inset-0 z-[200] overflow-y-auto bg-[#060608] text-white"
       style={{ scrollBehavior: "smooth" }}
     >
@@ -436,6 +440,8 @@ export default function KeralaOverlay({ isOpen, onClose }: Props) {
           </FadeIn>
         </div>
       </section>
-    </div>
+    </motion.div>
+    )}
+    </AnimatePresence>
   );
 }
