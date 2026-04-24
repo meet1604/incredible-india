@@ -15,3 +15,5 @@ services:
         value: 10000
       - key: SESSION_SECRET
         generateValue: true
+      - key: DATABASE_URL
+        sync: false
