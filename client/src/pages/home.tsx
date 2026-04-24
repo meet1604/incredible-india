@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <main className="bg-[#0a0a0a] text-white overflow-x-hidden font-inter">
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5" : ""}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/5" : "bg-black/40 backdrop-blur-sm"}`}>
         <div className="max-w-screen-xl mx-auto px-6 md:px-10 h-16 md:h-20 flex items-center justify-between">
           <Link href="/">
             <motion.div className="flex flex-col cursor-pointer">
