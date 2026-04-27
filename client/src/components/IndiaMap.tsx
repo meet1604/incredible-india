@@ -47,11 +47,11 @@ export interface IndiaMapHandle {
 }
 
 interface IndiaMapProps {
-  onKeralaClick?: () => void;
+  onStateClick?: (stateName: string) => void;
 }
 
 const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
-  { onKeralaClick },
+  { onStateClick },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -105,7 +105,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
 
   const pathGen = geoPath().projection(projection);
 
-  const handleKeralaClick = (feature: any) => {
+  const handleStateClick = (feature: any, stateName: string) => {
     if (zooming || !svgWrapperRef.current) return;
     setZooming(true);
     setHovered(null);
@@ -127,7 +127,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
     });
 
     gsap.delayedCall(0.7, () => {
-      onKeralaClick?.();
+      onStateClick?.(stateName);
     });
   };
 
@@ -155,7 +155,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
         </div>
       )}
 
-      {/* Kerala click hint */}
+      {/* Hint */}
       {geoData && !zooming && (
         <div
           style={{
@@ -171,7 +171,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
             className="font-montserrat text-white/25 uppercase"
             style={{ fontSize: 9, letterSpacing: "0.3em" }}
           >
-            Click Kerala to explore
+            Click any state to explore
           </span>
         </div>
       )}
@@ -192,7 +192,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
           >
             {geoData.features.map((feature: any, i: number) => {
               const name: string = feature.properties?.ST_NM ?? "";
-              const isKerala = name === "Kerala";
+              const isClickable = name in STATE_LABELS;
               const isHovered = hovered === name;
               const d = pathGen(feature) ?? "";
 
@@ -205,7 +205,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
                   strokeWidth={isHovered ? 1.4 : 0.6}
                   style={{
                     transition: "fill 0.2s ease, stroke 0.2s ease",
-                    cursor: isKerala ? "pointer" : "default",
+                    cursor: isClickable ? "pointer" : "default",
                     filter: isHovered
                       ? "drop-shadow(0 0 10px rgba(250,204,21,0.5))"
                       : "none",
@@ -218,7 +218,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
                       .getBoundingClientRect();
                     setTooltip({
                       name,
-                      label: isKerala ? "Click to Explore ✦" : STATE_LABELS[name],
+                      label: isClickable ? "Click to Explore ✦" : STATE_LABELS[name],
                       x: e.clientX - rect.left,
                       y: e.clientY - rect.top,
                     });
@@ -240,7 +240,7 @@ const IndiaMap = forwardRef<IndiaMapHandle, IndiaMapProps>(function IndiaMap(
                       setTooltip(null);
                     }
                   }}
-                  onClick={isKerala ? () => handleKeralaClick(feature) : undefined}
+                  onClick={isClickable ? () => handleStateClick(feature, name) : undefined}
                 />
               );
             })}

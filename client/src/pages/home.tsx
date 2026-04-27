@@ -9,7 +9,8 @@ import IndiaMap, { IndiaMapHandle } from "@/components/IndiaMap";
 import { Hero } from "@/components/Hero";
 import { type SiteSettings, type Hotspot } from "@shared/schema";
 import { AdminPanel } from "@/components/AdminPanel";
-import KeralaOverlay from "@/components/KeralaOverlay";
+import StateOverlay from "@/components/StateOverlay";
+import { statesData } from "@/data/statesData";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,7 +25,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [keralaOpen, setKeralaOpen] = useState(false);
+  const [activeState, setActiveState] = useState<string | null>(null);
   const indiaMapRef = useRef<IndiaMapHandle>(null);
   const statsRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +129,7 @@ export default function Home() {
           </div>
           <div className="flex justify-center">
             <div className="relative w-full max-w-3xl h-[500px] md:h-[700px]">
-              <IndiaMap ref={indiaMapRef} onKeralaClick={() => setKeralaOpen(true)} />
+              <IndiaMap ref={indiaMapRef} onStateClick={(name) => setActiveState(name)} />
             </div>
           </div>
         </div>
@@ -137,11 +138,12 @@ export default function Home() {
       {/* Admin Panel */}
       <AdminPanel open={adminOpen} onOpenChange={setAdminOpen} />
 
-      {/* Kerala Page */}
-      <KeralaOverlay
-        isOpen={keralaOpen}
+      {/* State Pages */}
+      <StateOverlay
+        isOpen={activeState !== null}
+        state={activeState ? (statesData[activeState] ?? null) : null}
         onClose={() => {
-          setKeralaOpen(false);
+          setActiveState(null);
           setTimeout(() => indiaMapRef.current?.resetZoom(), 100);
         }}
       />
