@@ -24,32 +24,36 @@ function Router() {
 
 function AppContent() {
   const [location] = useLocation();
+  const [preloaded, setPreloaded] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const showLoader = !loaded && location === "/";
+  const isHome = location === "/";
 
   return (
     <>
-      {showLoader && (
+      {/* Globe loader — only on home, only until done */}
+      {!loaded && isHome && (
         <GlobeLoader
+          onPreload={() => setPreloaded(true)}
           onComplete={() => {
             window.scrollTo(0, 0);
             setLoaded(true);
           }}
         />
       )}
-      <AnimatePresence>
-        {loaded && (
-          <motion.div
-            key="main"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          >
-            <Router />
-          </motion.div>
-        )}
-        {!loaded && location !== "/" && <Router />}
-      </AnimatePresence>
+
+      {/* Non-home pages always render normally */}
+      {!isHome && <Router />}
+
+      {/* Home: mount silently when preloaded so video loads, reveal when done */}
+      {isHome && (preloaded || loaded) && (
+        <motion.div
+          animate={{ opacity: loaded ? 1 : 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{ pointerEvents: loaded ? "auto" : "none" }}
+        >
+          <Router />
+        </motion.div>
+      )}
     </>
   );
 }

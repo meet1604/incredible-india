@@ -11,9 +11,10 @@ const FULL_SPIN_MS = 5000;
 
 interface GlobeLoaderProps {
   onComplete: () => void;
+  onPreload?: () => void;
 }
 
-export function GlobeLoader({ onComplete }: GlobeLoaderProps) {
+export function GlobeLoader({ onComplete, onPreload }: GlobeLoaderProps) {
   const globeEl = useRef<any>(null);
   const [indiaFeature, setIndiaFeature] = useState<any[]>([]);
   const [phase, setPhase] = useState<"spinning" | "landing" | "zooming" | "done">("spinning");
@@ -48,10 +49,11 @@ export function GlobeLoader({ onComplete }: GlobeLoaderProps) {
       setPhase("landing");
       globe.pointOfView({ lat: INDIA_LAT, lng: INDIA_LNG, altitude: 1.5 }, 1800);
 
-      // Zoom in close
+      // Zoom in close — fire preload so home page mounts silently in background
       setTimeout(() => {
         setPhase("zooming");
         globe.pointOfView({ lat: INDIA_LAT, lng: INDIA_LNG, altitude: 0.07 }, 1800);
+        onPreload?.();
 
         // Fade out and hand off
         setTimeout(() => {
