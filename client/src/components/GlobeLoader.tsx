@@ -43,17 +43,19 @@ export function GlobeLoader({ onComplete, onPreload }: GlobeLoaderProps) {
     globe.controls().enableZoom = false;
     globe.controls().enableRotate = false;
 
+    // Mount home page silently in background immediately so video has max time to load
+    onPreload?.();
+
     // After one full spin, fly to India
     setTimeout(() => {
       globe.controls().autoRotate = false;
       setPhase("landing");
       globe.pointOfView({ lat: INDIA_LAT, lng: INDIA_LNG, altitude: 1.5 }, 1800);
 
-      // Zoom in close — fire preload so home page mounts silently in background
+      // Zoom in close
       setTimeout(() => {
         setPhase("zooming");
         globe.pointOfView({ lat: INDIA_LAT, lng: INDIA_LNG, altitude: 0.07 }, 1800);
-        onPreload?.();
 
         // Fade out and hand off
         setTimeout(() => {
