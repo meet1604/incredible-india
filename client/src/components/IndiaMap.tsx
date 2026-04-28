@@ -33,6 +33,13 @@ const STATE_LABELS: Record<string, string> = {
   "Nagaland":          "Land of Festivals",
   "Mizoram":           "Land of the Blue Mountain",
   "Tripura":           "Land of Fourteen Gods",
+  "Ladakh":            "Land of High Passes",
+  "Delhi":             "Heart of the Nation",
+  "Puducherry":        "The French Riviera of the East",
+  "Chandigarh":        "The City Beautiful",
+  "Andaman & Nicobar": "Emerald Islands",
+  "Lakshadweep":       "Jewels of the Arabian Sea",
+  "Dadra and Nagar Haveli and Daman and Diu": "Coastal Gems",
 };
 
 interface TooltipState {
