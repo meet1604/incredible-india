@@ -29,14 +29,21 @@ function AppContent() {
 
   return (
     <>
-      {showLoader && <GlobeLoader onComplete={() => setLoaded(true)} />}
+      {showLoader && (
+        <GlobeLoader
+          onComplete={() => {
+            window.scrollTo(0, 0);
+            setLoaded(true);
+          }}
+        />
+      )}
       <AnimatePresence>
         {loaded && (
           <motion.div
             key="main"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <Router />
           </motion.div>
