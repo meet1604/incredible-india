@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Menu, X, Utensils, Settings, MapPin, ArrowRight } from "lucide-react";
+import { Menu, X, Utensils, MapPin, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import IndiaMap, { IndiaMapHandle } from "@/components/IndiaMap";
@@ -83,11 +83,6 @@ export default function Home() {
           </ul>
 
           <div className="flex items-center gap-4">
-            <Link href="/admin">
-              <button className="p-2 text-white/40 hover:text-white transition-colors">
-                <Settings className="w-4 h-4" />
-              </button>
-            </Link>
             <button className="hidden md:block font-montserrat text-xs tracking-[0.15em] font-semibold uppercase px-6 py-2.5 border border-white/30 text-white hover:bg-white hover:text-black transition-all rounded-sm">
               Explore Now
             </button>
