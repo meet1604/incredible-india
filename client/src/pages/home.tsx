@@ -144,7 +144,7 @@ export default function Home() {
         state={activeState ? (statesData[activeState] ?? null) : null}
         onClose={() => {
           setActiveState(null);
-          setTimeout(() => indiaMapRef.current?.resetZoom(), 100);
+          setTimeout(() => indiaMapRef.current?.resetZoom(), 650);
         }}
       />
     </main>

@@ -17,10 +17,24 @@ interface GlobeLoaderProps {
 export function GlobeLoader({ onComplete, onPreload }: GlobeLoaderProps) {
   const globeEl = useRef<any>(null);
   const [indiaFeature, setIndiaFeature] = useState<any[]>([]);
+  const [globeTexture, setGlobeTexture] = useState<string>("");
   const [phase, setPhase] = useState<"spinning" | "landing" | "zooming" | "done">("spinning");
-  const [visible, setVisible] = useState(true);
 
-  // Only fetch + parse India's polygon — much lighter than all countries
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d")!;
+      ctx.filter = "grayscale(1)";
+      ctx.drawImage(img, 0, 0);
+      setGlobeTexture(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.src = "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg";
+  }, []);
+
   useEffect(() => {
     fetch("https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson")
       .then((r) => r.json())
@@ -32,6 +46,7 @@ export function GlobeLoader({ onComplete, onPreload }: GlobeLoaderProps) {
       })
       .catch(() => {});
   }, []);
+  const [visible, setVisible] = useState(true);
 
   const handleGlobeReady = useCallback(() => {
     const globe = globeEl.current;
@@ -97,10 +112,9 @@ export function GlobeLoader({ onComplete, onPreload }: GlobeLoaderProps) {
             width={window.innerWidth}
             height={window.innerHeight}
             backgroundColor="#000000"
-            globeImageUrl="https://unpkg.com/three-globe/example/img/earth-dark.jpg"
+            globeImageUrl={globeTexture}
             atmosphereColor="#ff9933"
             atmosphereAltitude={0.18}
-            // Only render India's polygon — zero cost during spin
             polygonsData={phase !== "spinning" ? indiaFeature : []}
             polygonCapColor={() => "rgba(255,153,51,0.75)"}
             polygonSideColor={() => "rgba(0,0,0,0)"}

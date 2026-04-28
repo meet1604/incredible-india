@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { X, Clock, ChevronDown } from "lucide-react";
 import { MapPin } from "lucide-react";
@@ -114,6 +114,12 @@ interface Props {
 
 export default function StateOverlay({ isOpen, onClose, state }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  // Keep a local copy so the exit animation can render content even after `state` goes null
+  const [displayState, setDisplayState] = useState<StateData | null>(null);
+
+  useEffect(() => {
+    if (state) setDisplayState(state);
+  }, [state]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -124,19 +130,17 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
     };
   }, [isOpen]);
 
-  if (!state) return null;
-
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isOpen && displayState && (
         <motion.div
           ref={overlayRef}
+          data-lenis-prevent
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: "easeInOut" }}
           className="fixed inset-0 z-[200] overflow-y-auto bg-[#060608] text-white"
-          style={{ scrollBehavior: "smooth" }}
         >
           {/* Close */}
           <button
@@ -149,8 +153,8 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
           {/* ── HERO ───────────────────────────────────────────────── */}
           <section className="relative h-screen overflow-hidden">
             <img
-              src={state.heroImg}
-              alt={state.name}
+              src={displayState.heroImg}
+              alt={displayState.name}
               className="absolute inset-0 w-full h-full object-cover scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#060608]" />
@@ -162,7 +166,7 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
                 transition={{ delay: 0.2, duration: 0.8 }}
                 className="font-montserrat text-[10px] tracking-[0.5em] uppercase text-amber-400/90 mb-6"
               >
-                {state.tagline}
+                {displayState.tagline}
               </motion.p>
               <motion.h1
                 initial={{ opacity: 0, y: 24 }}
@@ -171,7 +175,7 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
                 className="font-cinzel font-bold text-white leading-none mb-6"
                 style={{ fontSize: "clamp(4rem, 10vw, 8rem)", letterSpacing: "0.04em" }}
               >
-                {state.name}
+                {displayState.name}
               </motion.h1>
               <motion.div
                 initial={{ scaleX: 0 }}
@@ -185,7 +189,7 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
                 transition={{ delay: 0.75, duration: 0.9 }}
                 className="font-inter text-white/60 text-base md:text-lg max-w-2xl leading-relaxed italic"
               >
-                {state.heroParagraph}
+                {displayState.heroParagraph}
               </motion.p>
             </div>
 
@@ -202,7 +206,7 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
           {/* ── QUICK STATS ──────────────────────────────────────────── */}
           <section className="py-16 border-y border-white/5 bg-white/[0.02]">
             <div className="max-w-5xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {state.stats.map((s, i) => (
+              {displayState.stats.map((s, i) => (
                 <FadeIn key={i} delay={i * 0.08}>
                   <div className="font-cinzel text-3xl font-bold text-white mb-1">{s.n}</div>
                   <div className="font-montserrat text-white/35 text-[10px] tracking-[0.25em] uppercase">
@@ -218,10 +222,10 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
             <SectionHeader
               eyebrow="Destinations"
               title="Places to Visit"
-              subtitle={`Explore the best of ${state.name} — from ancient temples to natural wonders.`}
+              subtitle={`Explore the best of ${displayState.name} — from ancient temples to natural wonders.`}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {state.places.map((p, i) => (
+              {displayState.places.map((p, i) => (
                 <FadeIn key={p.title} delay={i * 0.07}>
                   <div className="group relative rounded-xl overflow-hidden bg-white/[0.03] border border-white/8 hover:border-amber-400/30 transition-all duration-500 cursor-pointer">
                     <div className="relative h-56 overflow-hidden">
@@ -255,10 +259,10 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
               <SectionHeader
                 eyebrow="Culture"
                 title="Living Traditions"
-                subtitle={`${state.name}'s culture is a living tapestry of art, festivals, and ancient customs.`}
+                subtitle={`${displayState.name}'s culture is a living tapestry of art, festivals, and ancient customs.`}
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {state.culture.map((c, i) => (
+                {displayState.culture.map((c, i) => (
                   <FadeIn key={c.title} delay={i * 0.1}>
                     <div className="group flex gap-5 rounded-xl bg-white/[0.03] border border-white/8 hover:border-white/15 p-5 transition-all duration-400">
                       <div className="relative w-32 h-32 rounded-lg overflow-hidden shrink-0">
@@ -286,11 +290,11 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
           <section className="py-28 px-6 max-w-7xl mx-auto">
             <SectionHeader
               eyebrow="Cuisine"
-              title={`Flavours of ${state.name}`}
+              title={`Flavours of ${displayState.name}`}
               subtitle="A journey through the tastes, aromas, and stories behind the food."
             />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {state.food.map((f, i) => (
+              {displayState.food.map((f, i) => (
                 <FadeIn key={f.name} delay={i * 0.06}>
                   <div className="group relative rounded-xl overflow-hidden aspect-[4/3] cursor-pointer">
                     <img
@@ -320,12 +324,12 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
               <SectionHeader
                 eyebrow="History"
                 title="Centuries of Stories"
-                subtitle={`From ancient civilisations to modern milestones — the history of ${state.name}.`}
+                subtitle={`From ancient civilisations to modern milestones — the history of ${displayState.name}.`}
               />
               <div className="relative">
                 <div className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-amber-400/40 via-amber-400/20 to-transparent md:left-1/2 md:-translate-x-px" />
                 <div className="flex flex-col gap-10">
-                  {state.history.map((h, i) => (
+                  {displayState.history.map((h, i) => (
                     <FadeIn key={h.era} delay={i * 0.08}>
                       <div
                         className={`relative flex gap-6 md:gap-0 ${
@@ -357,8 +361,8 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
           <section className="relative py-36 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
             <div className="absolute inset-0">
               <img
-                src={state.ctaImg}
-                alt={state.name}
+                src={displayState.ctaImg}
+                alt={displayState.name}
                 className="w-full h-full object-cover opacity-20"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#060608] via-transparent to-[#060608]" />
@@ -369,10 +373,10 @@ export default function StateOverlay({ isOpen, onClose, state }: Props) {
                   Begin Your Journey
                 </p>
                 <h2 className="font-cinzel text-4xl md:text-6xl font-bold text-white mb-6">
-                  {state.name} Awaits
+                  {displayState.name} Awaits
                 </h2>
                 <p className="font-inter text-white/45 max-w-md mx-auto text-sm leading-relaxed mb-10">
-                  {state.ctaText}
+                  {displayState.ctaText}
                 </p>
                 <button
                   onClick={onClose}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { queryClient } from "./lib/queryClient";
@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Cookbook from "@/pages/cookbook";
 import Admin from "@/pages/admin";
 import { GlobeLoader } from "@/components/GlobeLoader";
+import Lenis from "lenis";
 
 function Router() {
   return (
@@ -59,6 +60,27 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      prevent: (node: Element) => !!node.closest("[data-lenis-prevent]"),
+    });
+
+    let raf: number;
+    const loop = (time: number) => {
+      lenis.raf(time);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
